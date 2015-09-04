@@ -1,0 +1,35 @@
+{% load static from staticfiles %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'bootstrap4/css/bootstrap.min.css' %}">
+    {% block head %}{% endblock %}
+  </head>
+  <body id="{% block page_id %}{% endblock %}" class="{% block body_classes %}{% endblock %}" {% block body_attrs %}{% endblock %}>
+    <nav>
+      {% if request.user.profile %}
+      <a href="{% url 'projects:project-list' %}">Project List</a>
+      <a href="{% url 'projects:category-list' %}">Category List</a>
+      <a href="{% url 'projects:task-list' %}">Task List</a>
+      <a href="{% url 'profile-detail' request.user.profile.pk %}">{{request.user}}</a>
+      <a href="{% url 'logout'%}">logout</a>
+      {% endif %}
+
+    </nav>
+
+
+    <main>
+      <div class="container">
+        {% block content %}{% endblock %}
+
+        {% block scripts %}{% endblock %}    
+      </div>
+
+    </main>
+
+
+  </body>
+</html>

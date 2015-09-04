@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% load core %}
+
+{% block content %}
+  {{object.name}}
+
+  <a class="back" href="{% get_url 'list' %}">Back</a>
+{% endblock %}

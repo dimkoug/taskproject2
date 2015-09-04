@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load core %}
+
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <a class="create  btn btn-primary float-right" href="{% get_url 'create' %}">Create</a>
+  </div>
+</div>
+<div class="row">
+  <div class="col-12">
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Uuid</th>
+            <th>Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for obj in object_list %}
+          <tr>
+            <td>{{obj.uuid}}</td>
+            <td><a class="detail" href="{% get_url 'detail' obj %}">{{obj.name}}</a></td>
+            <td>
+              <a class="update btn btn-warning" href="{% get_url 'update' obj %}">Update</a>
+              <a class="delete btn btn-danger" href="{% get_url 'delete' obj %}">Delete</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+</div>
+
+
+
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load core %}
+
+{% block content %}
+<form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <input class="save btn btn-primary" type="submit" value="{% if form.instance.pk %}Update {% else %}Save {% endif %}">
+    {% if form.instance.pk %}
+    <input class="continue btn btn-default" type="button" name="continue" value="Save and continue editing"></input>
+    <a class="delete btn btn-danger" href="{% get_url 'delete' form.instance %}">Delete</a>
+    {% endif %}
+</form>
+
+  <a class="back btn btn-default" href="{% get_url 'list' %}">Back</a>
+{% endblock %}
