@@ -1,11 +1,11 @@
 from django.db import models
 
 # Create your models here.
-from core.models import Timestamped, UUidModel
+from core.models import Timestamped
 from profiles.models import Profile
 
 
-class Category(Timestamped, UUidModel):
+class Category(Timestamped):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
 
@@ -18,7 +18,7 @@ class Category(Timestamped, UUidModel):
         return self.name
 
 
-class Project(Timestamped, UUidModel):
+class Project(Timestamped):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
 
@@ -31,7 +31,7 @@ class Project(Timestamped, UUidModel):
         return self.name
 
 
-class Task(Timestamped, UUidModel):
+class Task(Timestamped):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
 

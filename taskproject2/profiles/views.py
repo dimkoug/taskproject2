@@ -1,13 +1,13 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.core.exceptions import PermissionDenied
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 # Create your views here.
+
 from .forms import ProfileForm
 from .models import Profile
-
-from core.mixins import ProtectedViewMixin
 
 
 class ProtectProfile:
@@ -17,14 +17,28 @@ class ProtectProfile:
         return super().dispatch(*args, **kwargs)
 
 
-class ProfileDetail(ProtectProfile, ProtectedViewMixin, DetailView):
+class ProfileDetailView(ProtectProfile, LoginRequiredMixin, DetailView):
     model = Profile
 
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        return context
 
-class ProfileUpdate(ProtectProfile, ProtectedViewMixin, UpdateView):
+
+class ProfileUpdateView(ProtectProfile, LoginRequiredMixin, UpdateView):
     model = Profile
     form_class = ProfileForm
     template_name = 'profiles/profile_form.html'
 
     def get_success_url(self, **kwargs):
-        return reverse_lazy('profile-detail', kwargs = {'pk': self.get_object().pk})
+        return reverse_lazy('profile-detail',
+                            kwargs={'pk': self.get_object().pk})
+
+
+class ProfileDeleteView(ProtectProfile, LoginRequiredMixin, DeleteView):
+    model = Profile
+    template_name = 'profiles/profile_confirm_delete.html'
+
+    def get_success_url(self, **kwargs):
+        return reverse_lazy('profile-detail',
+                            kwargs={'pk': self.get_object().pk})

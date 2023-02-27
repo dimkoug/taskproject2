@@ -1,5 +1,21 @@
 {% extends 'base.html' %}
 
+
+
 {% block content %}
-  home
-{% endblock %}
+<div class="row mt-2">
+    <div class="card col-4 py-2 m-2">
+        <div class="card-header">
+            Projects
+          </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item"> <a href="{% url 'projects:category-list' %}">Categories</a> </li>
+          <li class="list-group-item"> <a href="{% url 'projects:project-list' %}">Projects</a> </li>
+          <li class="list-group-item"> <a href="{% url 'projects:task-list' %}">Tasks</a> </li>
+        </ul>
+      </div>
+</div>
+
+
+
+{% endblock content %}

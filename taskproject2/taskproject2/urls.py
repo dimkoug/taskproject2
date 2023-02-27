@@ -15,24 +15,21 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
 from django.conf import settings
 from django.conf.urls.static import static
 
-from rest_framework.authtoken import views
+from core.functions import delete_model
 
-from projects.api import routers
 
-from .views import Home
-
+from .views import IndexView
 
 urlpatterns = [
-    path('', Home.as_view(), name='home'),
+    path('', IndexView.as_view(), name='index'),
+    path('projects/', include('projects.urls',namespace='projects')),
+    path('delete/', delete_model, name='delete'),
     path('users/', include('users.urls')),
+    path('users/api/', include('users.api.routers')),
     path('profiles/', include('profiles.urls')),
-    path('projects/',  include('projects.urls')),
-    path('api-token-auth/', views.obtain_auth_token, name='api-token'),
-    path('api/', include(routers.router.urls)),
     path('admin/', admin.site.urls),
 ]
 

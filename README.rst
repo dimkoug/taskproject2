@@ -1,5 +1,5 @@
 =====
-Django taskproject application with django 2.1 python 3, django rest, celery
+Django taskproject application
 =====
 
 Quick start
