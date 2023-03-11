@@ -17,7 +17,7 @@
                 <div class="tab-content">
                     <div class="tab-pane active" id="info" role="tabpanel" aria-labelledby="info-tab" tabindex="0">
                         <div class="row">
-                            <div class="col-12">
+                            <div class="col-6">
                               <div class="form-group">
                                 {{ form.category.label_tag }}
                                 {{form.category}}
@@ -27,13 +27,27 @@
                                 </div>
                                 {%endif%}
                                 {% if form.category.help_text %}
-                                  <small class="form-text text-muted">{{ form.first_category.help_text }}</small>
+                                  <small class="form-text text-muted">{{ form.category.help_text }}</small>
+                                {% endif %}
+                              </div>
+                            </div>
+                            <div class="col-6">
+                              <div class="form-group">
+                                {{ form.parent.label_tag }}
+                                {{form.parent}}
+                                {% if form.parent.errors %}
+                                <div class="invalid-feedback">
+                                  {{form.parent.errors}}
+                                </div>
+                                {%endif%}
+                                {% if form.parent.help_text %}
+                                  <small class="form-text text-muted">{{ form.parent.help_text }}</small>
                                 {% endif %}
                               </div>
                             </div>
                         </div>
                         <div class="row">
-                          <div class="col-12">
+                          <div class="col-6">
                             <div class="form-group">
                               {{ form.name.label_tag }}
                               {{form.name}}
@@ -43,7 +57,21 @@
                               </div>
                               {%endif%}
                               {% if form.name.help_text %}
-                                <small class="form-text text-muted">{{ form.first_name.help_text }}</small>
+                                <small class="form-text text-muted">{{ form.name.help_text }}</small>
+                              {% endif %}
+                            </div>
+                          </div>
+                          <div class="col-6">
+                            <div class="form-group">
+                              {{ form.budget.label_tag }}
+                              {{form.budget}}
+                              {% if form.budget.errors %}
+                              <div class="invalid-feedback">
+                                {{form.budget.errors}}
+                              </div>
+                              {%endif%}
+                              {% if form.budget.help_text %}
+                                <small class="form-text text-muted">{{ form.budget.help_text }}</small>
                               {% endif %}
                             </div>
                           </div>
@@ -76,6 +104,19 @@
       $("#id_category").select2({
         ajax: {
           url: '/projects/get_sb_categories_data/',
+          data: function (params) {
+            var query = {
+              search: params.term,
+              type: 'public'
+            }
+            // Query parameters will be ?search=[term]&type=public
+            return query;
+          }
+        }
+      });
+      $("#id_parent").select2({
+        ajax: {
+          url: '/projects/get_sb_projects_data/',
           data: function (params) {
             var query = {
               search: params.term,

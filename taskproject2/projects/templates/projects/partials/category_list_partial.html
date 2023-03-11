@@ -7,13 +7,15 @@
             <thead>
               <tr>
                 <th>Name</th>
+                <th>Projects</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               {% for obj in object_list %}
               <tr>
-                <td>{{obj}}</td>
+                <td><a href="{% get_url 'detail' obj %}">{{obj}}</a></td>
+                <td><a href="{% url 'projects:project-list' %}?category={{obj.pk}}">Projects</a></td>
                 <td>
                   {% include 'partials/action_buttons.html' with obj=obj %}
                 </td>

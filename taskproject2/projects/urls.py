@@ -2,7 +2,8 @@ from django.urls import path
 
 from .functions import (
     get_sb_projects_data,
-    get_sb_categories_data
+    get_sb_categories_data,
+    get_tasks_for_sb
 )
 
 
@@ -24,6 +25,9 @@ from .views import (
     TaskCreateView,
     TaskUpdateView,
     TaskDeleteView,
+
+    CPMReportListView,
+    CPMReportDetailView,
 )
 
 app_name = 'projects'
@@ -47,7 +51,13 @@ urlpatterns = [
     path('tasks/update/<int:pk>/', TaskUpdateView.as_view(), name="task-update"),
     path('tasks/delete/<int:pk>/', TaskDeleteView.as_view(), name="task-delete"),
 
+
+    path('cpm/reports/', CPMReportListView.as_view(), name="cpmreport-list"),
+    path('cpm/reports/<int:pk>/', CPMReportDetailView.as_view(), name="cpmreport-detail"),
+
+
     path('get_sb_projects_data/', get_sb_projects_data, name='sb-projects'),
     path('get_sb_categories_data/', get_sb_categories_data, name='sb-categories'),
+    path('get_tasks_for_sb/', get_tasks_for_sb, name='get_tasks_for_sb'),
 
 ]

@@ -7,21 +7,16 @@
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Category</th>
-                <th>Parent</th>
-                <th></th>
+                <th>Project</th>
+                <th>Created</th>
               </tr>
             </thead>
             <tbody>
               {% for obj in object_list %}
               <tr>
-                <td>{{obj}}</td>
-                <td>{{obj.category}}</td>
-                <td>{{obj.parent|default_if_none:"---"}}</td>
-                <td>
-                  {% include 'partials/action_buttons.html' with obj=obj %}
-                  <a href="{% url 'projects:cpmreport-list' %}?project={{obj.pk}}">Cpm reports</a>
-                </td>
+                <td><a href="{% url 'projects:cpmreport-detail' obj.pk %}">{{obj}}</a></td>
+                <td>{{obj.project}}</td>
+                <td>{{obj.created|date:"d/m/Y"}}</td>
               </tr>
               {% endfor %}
             </tbody>

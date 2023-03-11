@@ -5,8 +5,6 @@
 
 {% include 'partials/title_partial.html' %}
 
-{% include 'partials/create_button.html' %}
-
 <div class="row py-2">
   <div class="col">
     <div class="card">
@@ -18,14 +16,8 @@
           </div>
           <div class="row">
             <div class="col-6">
-              <label for="id_category" class="form-label">Category</label>
-              <select class="form-select" id="id_category" name="category" aria-label="Default select example">
-                <option value="">----</option>
-              </select>
-            </div>
-            <div class="col-6">
-              <label for="id_parent" class="form-label">Parent</label>
-              <select class="form-select" id="id_parent" name="parent" aria-label="Default select example">
+              <label for="id_project" class="form-label">Project</label>
+              <select class="form-select" id="id_project" name="project" aria-label="Default select example">
                 <option value="">----</option>
               </select>
             </div>
@@ -68,20 +60,7 @@
   (function(w,d,$){
     $(d).ready(function(){
 
-      $("#id_category").select2({
-        ajax: {
-          url: '/projects/get_sb_categories_data/',
-          data: function (params) {
-            var query = {
-              search: params.term,
-              type: 'public'
-            }
-            // Query parameters will be ?search=[term]&type=public
-            return query;
-          }
-        }
-      });
-      $("#id_parent").select2({
+      $("#id_project").select2({
         ajax: {
           url: '/projects/get_sb_projects_data/',
           data: function (params) {

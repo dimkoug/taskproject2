@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.db.models import Q
 from core.functions import get_sb_data
-from projects.models import Category,Project
+from projects.models import Category,Project, Task
 
 
 def get_sb_categories_data(request):
@@ -30,3 +30,22 @@ def get_sb_projects_data(request):
             q_obj = eval(str_q)
             q_objects |= q_obj
     return get_sb_data(queryset,q_objects)
+
+
+def get_tasks_for_sb(request):
+    """"
+    Return Data for  select box 2  plugin
+    """
+    results = []
+    if not request.user.is_authenticated:
+        return JsonResponse(results, safe=False)
+    search = request.GET.get('search')
+    if search and search != '':
+        data = Task.objects.select_related('project__category__profile').filter(
+            Q(name__icontains=search),project__category__profile_id=request.user.profile.pk
+        ).values('id', 'name')
+        for d in data:
+            results.append({'id':d['id'], "text": d['name']})
+        # j_data = serializers.serialize("json", data, fields=('erp_code', 'title'))
+        # return JsonResponse(j_data, safe=False)
+    return JsonResponse({"results": results}, safe=False)

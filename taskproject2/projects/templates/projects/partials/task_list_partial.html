@@ -8,6 +8,10 @@
               <tr>
                 <th>Name</th>
                 <th>Project</th>
+                <th>Start Date</th>
+                <th>End date</th>
+                <td>Duration</td>
+                <td>Predecessors</td>
                 <th></th>
               </tr>
             </thead>
@@ -16,6 +20,17 @@
               <tr>
                 <td>{{obj}}</td>
                 <td>{{obj.project}}</td>
+                <td>{{obj.start_date|date:"d/m/Y"}}</td>
+                <td>{{obj.end_date|date:"d/m/Y"}}</td>
+                <td>{{obj.duration}}</td>
+                <td>
+                  <ul>
+                    {% for p in obj.predecessors.all %}
+                      <li>{{p}}</li>
+                    {% endfor %}
+                  </ul>
+
+                </td>
                 <td>
                   {% include 'partials/action_buttons.html' with obj=obj %}
                 </td>

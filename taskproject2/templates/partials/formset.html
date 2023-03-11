@@ -51,12 +51,12 @@
                 deleteCssClass: 'col-2 delete',
                 addCssClass: 'formset_add_button'
             });
-            /*$('.formset_add_button').click(function(e){
+            $('.formset_add_button').click(function(e){
               var $allLinks = $("select").hasClass(".select2-hidden-accessible");
               for(item in $allLinks){
                 item.select2('destroy');
               }
-              $("select[name*='{{ formset.formset.prefix }}']" ).select2({
+              $("select[name*='-to_task']" ).select2({
                 ajax: {
                   url: '{{formset.sb_url}}',
                   data: function (params) {
@@ -70,7 +70,7 @@
                 }
               });
             })
-            $("select[name*='{{ formset.formset.prefix }}']" ).select2({
+            $("select[name*='-to_task']" ).select2({
               ajax: {
                 url: '{{formset.sb_url}}',
                 data: function (params) {
@@ -82,7 +82,7 @@
                   return query;
                 }
               }
-            });*/
+            });
           })
       </script>
   </div>
