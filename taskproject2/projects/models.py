@@ -2,11 +2,9 @@ from django.db import models
 
 # Create your models here.
 from core.models import Timestamped
-from profiles.models import Profile
-
 
 class Category(Timestamped):
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
 
     class Meta:
@@ -19,6 +17,7 @@ class Category(Timestamped):
 
 
 class Project(Timestamped):
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     budget = models.DecimalField(max_digits=18, decimal_places=2,blank=True, null=True)
@@ -34,6 +33,7 @@ class Project(Timestamped):
 
 
 class Task(Timestamped):
+    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     predecessors = models.ManyToManyField("self", through="Predecessor", through_fields=("from_task", "to_task"),symmetrical=False)
     name = models.CharField(max_length=100)

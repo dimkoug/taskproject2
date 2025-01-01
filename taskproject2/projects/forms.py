@@ -9,13 +9,13 @@ from .models import Category, Project, Task, Predecessor
 class CategoryForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Category
-        fields = ('name',)
+        fields = ('name','company')
 
 
 class ProjectForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Project
-        fields = ('category','parent', 'name','budget')
+        fields = ('category','parent','company', 'name','budget')
 
 
 class TaskForm(BootstrapForm, forms.ModelForm):
