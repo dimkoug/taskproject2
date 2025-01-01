@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "cms/base.html" %}
 {% load core %}
 
 
@@ -28,6 +28,22 @@
                                 {%endif%}
                                 {% if form.name.help_text %}
                                   <small class="form-text text-muted">{{ form.first_name.help_text }}</small>
+                                {% endif %}
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-6">
+                              <div class="form-group">
+                                {{ form.company.label_tag }}
+                                {{form.company}}
+                                {% if form.company.errors %}
+                                <div class="invalid-feedback">
+                                  {{form.company.errors}}
+                                </div>
+                                {%endif%}
+                                {% if form.company.help_text %}
+                                  <small class="form-text text-muted">{{ form.company.help_text }}</small>
                                 {% endif %}
                               </div>
                             </div>

@@ -47,7 +47,7 @@ class CategoryListView(BaseListView,QueryMixin):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.filter(profile_id=self.request.user.profile.id)
+        queryset = queryset.prefetch_related('company__profiles').filter(company__profiles=self.request.user.profile.id)
         return queryset
 
 
