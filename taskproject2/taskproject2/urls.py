@@ -18,7 +18,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from core.functions import delete_model
+from core.utils import delete_item
 
 
 from .views import IndexView
@@ -26,7 +26,7 @@ from .views import IndexView
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
     path('projects/', include('projects.urls',namespace='projects')),
-    path('delete/', delete_model, name='delete'),
+    path('delete/', delete_item, name='delete'),
     path('users/', include('users.urls')),
     path('users/api/', include('users.api.routers')),
     path('profiles/', include('profiles.urls')),

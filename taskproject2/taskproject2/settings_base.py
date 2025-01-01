@@ -13,11 +13,18 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 from django.contrib.messages import constants as messages
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from pathlib import Path
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
 PUBLIC_DIR = os.path.abspath(os.path.join(
     os.path.dirname(__file__), '..', '..', 'public'))
 VIRTUAL_ENV_DIR = os.path.abspath(os.path.join(
-    os.path.dirname(__file__), '..', '..', '.venv'))
+    os.path.dirname(__file__), '..', '..', 'venv'))
+TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
+
+PRIVATE_MEDIA_ROOT = os.path.abspath(os.path.join(
+    os.path.dirname(__file__), '..', '..', 'private','media'))
 
 
 CELERY_BROKER_URL = 'amqp://localhost'
@@ -29,6 +36,8 @@ CELERY_TASK_SERIALIZER = 'json'
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'w@fe@4r!%kx1kpw#xfc$1f9cjb(auc4jxo#)c_64w%d=u=!yvn'
+
+SESSION_COOKIE_NAME = 'taskproject2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -56,13 +65,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
+    'guardian',
+    'reversion',
     'core',
+    'dynamic',
     'users',
-    'users.api',
     'profiles',
+    'companies',
+    'invitations',
     'projects',
 ]
 
@@ -75,6 +89,10 @@ LOGIN_URL = '/users/login'
 LOGIN_REDIRECT_URL = 'index'
 LOGOUT_REDIRECT_URL = 'index'
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # Default backend
+    'guardian.backends.ObjectPermissionBackend',  # Guardian's object-level permissions backend
+)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -91,8 +109,8 @@ ROOT_URLCONF = 'taskproject2.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        # 'APP_DIRS': True,
+        'DIRS': [TEMPLATE_DIR],
+        #'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -154,11 +172,19 @@ STATICFILES_FINDERS = [
 ]
 
 
+
+
 REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    # 'DEFAULT_PAGINATION_CLASS': 'todo.api.pagination.CustomPagination',
     'PAGE_SIZE': 2,
 }
 
@@ -179,7 +205,7 @@ SIMPLE_JWT = {
     'JWK_URL': None,
     'LEEWAY': 0,
 
-    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_TYPES': ('Bearer','JWT'),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
@@ -195,3 +221,6 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
+
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -11,7 +11,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 
 from core.functions import is_ajax
-from core.mixins import PaginationMixin, ModelMixin, SuccessUrlMixin,FormMixin,QueryListMixin, AjaxDeleteMixin
+from core.mixins import PaginationMixin, ModelMixin, SuccessUrlMixin,FormMixin,QueryMixin, AjaxDeleteMixin
 
 from .models import Category, Project, Task, Predecessor, CPMReport,CPMReportData
 from .forms import CategoryForm, ProjectForm, TaskForm, PredecessorFormSet
@@ -20,7 +20,7 @@ from .calculate_critical_path import calculate_cpm
 
 class BaseListView(PaginationMixin, ModelMixin, LoginRequiredMixin, ListView):
     def dispatch(self, *args, **kwargs):
-        self.ajax_list_partial = '{}/partials/{}_list_partial.html'.format(self.model._meta.app_label,self.model.__name__.lower())
+        self.ajax_partial = '{}/partials/{}_list_partial.html'.format(self.model._meta.app_label,self.model.__name__.lower())
         return super().dispatch(*args, **kwargs)
     
     def get(self, request, *args, **kwargs):
@@ -28,14 +28,20 @@ class BaseListView(PaginationMixin, ModelMixin, LoginRequiredMixin, ListView):
         context = self.get_context_data()
         if is_ajax(request):
             html_form = render_to_string(
-                self.ajax_list_partial, context, request)
+                self.ajax_partial, context, request)
             return JsonResponse(html_form, safe=False)
         return super().get(request, *args, **kwargs)
 
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['template'] = self.ajax_partial
+        context['search'] = self.request.GET.get('search','')
+        return context
 
 
 
-class CategoryListView(BaseListView,QueryListMixin):
+
+class CategoryListView(BaseListView,QueryMixin):
     model = Category
     paginate_by = 100  # if pagination is desired
 
@@ -107,10 +113,11 @@ class ProjectListView(BaseListView):
 
         return queryset
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['template'] = self.ajax_partial
+        context['search'] = self.request.GET.get('search','')
         return context
-
 
 class ProjectDetailView(LoginRequiredMixin,DetailView):
     model = Project
@@ -164,6 +171,12 @@ class TaskListView(BaseListView):
         queryset = queryset.filter(
                 project__category__profile_id=self.request.user.profile.pk)
         return queryset
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['template'] = self.ajax_partial
+        context['search'] = self.request.GET.get('search','')
+        return context
 
 class TaskDetailView(LoginRequiredMixin,DetailView):
     model = Task
@@ -284,7 +297,7 @@ class CPMReportListView(PaginationMixin, ModelMixin, LoginRequiredMixin, ListVie
     queryset = CPMReport.objects.select_related('project__category__profile')
 
     def dispatch(self, *args, **kwargs):
-        self.ajax_list_partial = '{}/partials/{}_list_partial.html'.format(self.model._meta.app_label,self.model.__name__.lower())
+        self.ajax_partial = '{}/partials/{}_list_partial.html'.format(self.model._meta.app_label,self.model.__name__.lower())
         return super().dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -327,7 +340,7 @@ class CPMReportListView(PaginationMixin, ModelMixin, LoginRequiredMixin, ListVie
         context = self.get_context_data()
         if is_ajax(request):
             html_form = render_to_string(
-                self.ajax_list_partial, context, request)
+                self.ajax_partial, context, request)
             return JsonResponse(html_form, safe=False)
         return super().get(request, *args, **kwargs)
 
@@ -336,6 +349,12 @@ class CPMReportListView(PaginationMixin, ModelMixin, LoginRequiredMixin, ListVie
         queryset = queryset.filter(
                 project__category__profile_id=self.request.user.profile.pk)
         return queryset
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['template'] = self.ajax_partial
+        context['search'] = self.request.GET.get('search','')
+        return context
 
 
 class CPMReportDetailView(LoginRequiredMixin,DetailView):

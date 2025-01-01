@@ -5,6 +5,8 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth import get_user_model
 from django.contrib.auth import login, logout
 from django.shortcuts import render, redirect
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
 try:
     from django.utils.encoding import force_text
 except ImportError:
@@ -16,9 +18,12 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.template.loader import render_to_string
 from django.views.generic import FormView
+from django.conf import settings
+from companies.models import Company
+from profiles.models import Profile
 
-from .tokens import account_activation_token
-from .forms import (
+from users.tokens import account_activation_token
+from users.forms import (
     UserCreationForm, UserAuthenticationForm,
     UserPasswordResetForm
 )
@@ -53,9 +58,30 @@ class AccountActivationSent(TemplateView):
     template_name = 'registration/account_activation_sent.html'
 
 
+class SignupTypeView(TemplateView):
+    template_name = 'registration/signup_type.html'
+
+
+class PendingActivationView(TemplateView):
+    template_name = 'registration/pending_activation.html'
+
+
 class SignupView(FormView):
     form_class = UserCreationForm
     template_name = 'registration/signup.html'
+
+    def get_initial(self):
+        initial = super().get_initial()
+        if 'email' in self.request.session:
+            initial.update({
+                'email': self.request.session['email']
+            })
+        return initial
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
 
     def form_valid(self, form):
         if form.is_valid():
@@ -66,15 +92,70 @@ class SignupView(FormView):
             user.refresh_from_db()  # load the profile instance created by the signal
             user.profile.birth_date = form.cleaned_data.get('birth_date')
             user.save()
-            subject = 'Activate Your MySite Account'
-            message = render_to_string('registration/account_activation_email.html', {
-                    'user': user,
-                    'domain': current_site.domain,
-                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                    'token': account_activation_token.make_token(user),
-            })
-            user.email_user(subject, message)
-            return redirect('account_activation_sent')
+            signup_type = self.request.GET.get('type')
+            if signup_type == 'company':
+                company, created = Company.objects.get_or_create(name=self.request.POST['company'])
+                company.profiles.add(user.profile)
+                company.refresh_from_db()
+                if created and company.profiles.count() == 1:
+                    group, cr = Group.objects.get_or_create(name=f"{company.name}_{settings.ADMIN_GROUP}")
+                    content_type = ContentType.objects.get_for_model(Company)
+                    permissions = Permission.objects.filter(
+                            content_type=content_type,
+                            codename__in=['add_company', 'change_company', 'delete_company', 'view_company']
+                    )
+                    group.permissions.add(*permissions)
+
+                    user.groups.add(group)
+                    user.is_active = True
+                    user.profile.email_confirmed = True
+                    user.save()
+                    return redirect(settings.LOGIN_REDIRECT_URL)
+                else:
+                    group, cr = Group.objects.get_or_create(name=f"{company.name}_{settings.USERS_GROUP}")
+                    content_type = ContentType.objects.get_for_model(Company)
+                    permissions = Permission.objects.filter(
+                            content_type=content_type,
+                            codename__in=['view_company']
+                    )
+                    group.permissions.add(*permissions)
+                    user.groups.add(group)
+                    user.is_active = False
+                    user.profile.email_confirmed = False
+                    user.save()
+                    return redirect('pending_activation')
+            if not 'company' in self.request.session:  
+                subject = 'Activate Your MySite Account'
+                message = render_to_string('registration/account_activation_email.html', {
+                        'user': user,
+                        'domain': current_site.domain,
+                        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                        'token': account_activation_token.make_token(user),
+                })
+                user.email_user(subject, message)
+                return redirect('account_activation_sent')
+            else:
+                company = Company.objects.get(name=self.request.session.get('company'))
+                user.is_active = True
+                user.profile.email_confirmed = True
+                parent = Profile.objects.get(id=int(self.request.session.get('parent')))
+                user.profile.parent = parent
+                user.save()
+                company.profiles.add(user.profile)
+                company.save()
+                group, cr = Group.objects.get_or_create(name=f"{company.name}_{settings.USERS_GROUP}")
+                content_type = ContentType.objects.get_for_model(Company)
+                permissions = Permission.objects.filter(
+                        content_type=content_type,
+                        codename__in=['view_company']
+                )
+                group.permissions.add(*permissions)
+                user.groups.add(group)
+                user.save()
+                user.refresh_from_db()
+                login(self.request, user)
+                return redirect(settings.LOGIN_REDIRECT_URL)
+
         return super().form_valid(form)
 
 

@@ -1,5 +1,4 @@
 from django import forms
-from django.forms import BaseFormSet
 from django.utils.html import format_html
 from django.core.exceptions import ValidationError
 from django.forms.models import BaseInlineFormSet
@@ -7,7 +6,6 @@ from adminsortable2.admin import CustomInlineFormSet
 from django.contrib.admin.widgets import AdminFileWidget
 from django.utils.safestring import mark_safe
 from django.forms import ModelForm
-from sorl.thumbnail import get_thumbnail
 
 
 class BootstrapForm:
@@ -30,8 +28,6 @@ class CoreBaseForm(BootstrapForm, forms.ModelForm):
 
 
 class BootstrapFormSet(BaseInlineFormSet):
-    def get_deletion_widget(self):
-        return forms.CheckboxInput(attrs={'class': 'deletion'})
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         fields = ['CheckboxInput', 'ClearableFileInput', 'FileInput']
@@ -114,7 +110,6 @@ class AdminImageWidget(AdminFileWidget):
   def render(self, name, value, attrs=None, renderer=None):
     output = []
     if value and getattr(value, "url", None):
-      t = get_thumbnail(value,'80x80')
-      output.append('<img src="{}">'.format(t.url))
+      output.append('<img src="{}">'.format(value.url))
     output.append(super(AdminImageWidget, self).render(name, value, attrs))
     return format_html(u''.join(output))

@@ -1,4 +1,5 @@
 import os
+import mimetypes
 from .settings_base import *
 
 '''
@@ -8,6 +9,28 @@ This file is used to create a local settings_local.py file for development
 
 
 DEBUG = True
+
+ADMIN_GROUP = 'admins'
+USERS_GROUP = 'users'
+
+
+DJANGO_DEVELOPMENT = True
+
+
+mimetypes.add_type("text/css", ".css", True)
+
+
+if DJANGO_DEVELOPMENT:
+    # In development, use the Webpack dev server
+    WEBPACK_DEV_SERVER = 'http://localhost:9000/static/dist/'
+    STATICFILES_DIRS = [
+        BASE_DIR / "static/dist",
+    ]
+else:
+    # In production, use the collected static files
+    #print(os.getenv('DJANGO_DEVELOPMENT'))
+    STATIC_ROOT = BASE_DIR / "staticfiles"
+    WEBPACK_DEV_SERVER = STATIC_URL + 'dist/'
 
 CORS_ORIGIN_WHITELIST = [
      'http://localhost:3000'
@@ -107,8 +130,13 @@ CACHES = {
 
 
 try:
+     # configure based on your env configuration
     if os.name == 'nt':
         os.environ['PATH'] = os.path.join(VIRTUAL_ENV_DIR, r'.\Lib\site-packages\osgeo') + ';' + os.environ['PATH']
         os.environ['PROJ_LIB'] = os.path.join(VIRTUAL_ENV_DIR, r'.\Lib\site-packages\osgeo\data\proj') + ';' + os.environ['PATH']
+        GDAL_LIBRARY_PATH = os.path.join(VIRTUAL_ENV_DIR, r'.\Lib\site-packages\osgeo\gdal304.dll')
+
+        GDAL_LIBRARY_PATH = r'C:\Program Files\QGIS 3.40.1\bin\gdal309.dll'
+        GEOS_LIBRARY_PATH = r'C:\Program Files\QGIS 3.40.1\bin\geos_c.dll'
 except:
     pass
