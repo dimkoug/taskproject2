@@ -33,6 +33,7 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('users/api/', include('users.api.routers')),
     path('profiles/', include('profiles.urls')),
+    path('dynamic/', include('dynamic.urls')),
     path('admin/', admin.site.urls),
 ]
 

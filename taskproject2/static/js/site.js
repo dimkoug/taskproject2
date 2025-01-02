@@ -146,25 +146,25 @@ $.when($.ajax({
      })
 
 
-  $('#search-form select').each(function(){
-      let app = $(this).data("app");
-      let model = $(this).data("model");
-      $(this).select2({
-        ajax: {
-          url: '/sb_data/',
-          data: function (params) {
-            var query = {
-              search: params.term,
-              app:app,
-              model: model,
-              type: 'public'
-            }
-            // Query parameters will be ?search=[term]&type=public
-            return query;
-          }
-        }
-      });
-  });
+  // $('#search-form select').each(function(){
+  //     let app = $(this).data("app");
+  //     let model = $(this).data("model");
+  //     $(this).select2({
+  //       ajax: {
+  //         url: '/sb_data/',
+  //         data: function (params) {
+  //           var query = {
+  //             search: params.term,
+  //             app:app,
+  //             model: model,
+  //             type: 'public'
+  //           }
+  //           // Query parameters will be ?search=[term]&type=public
+  //           return query;
+  //         }
+  //       }
+  //     });
+  // });
 
 
 

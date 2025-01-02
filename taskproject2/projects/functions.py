@@ -7,29 +7,43 @@ from projects.models import Category,Project, Task
 def get_sb_categories_data(request):
     if request.user.is_anonymous:
         return JsonResponse({"results":[]},safe=False)
-    queryset = Category.objects.select_related('profile').filter(profile_id=request.user.profile)
+    queryset = Category.objects.prefetch_related('company__profiles').filter(company__profiles__in=[request.user.profile])
     q_objects = Q()
+    d_objects = []
     q = request.GET.get('search')
     for f in  Category._meta.get_fields():
         if f.__class__.__name__  in ['CharField', 'TextField']:
             str_q = f"Q({f.name}__icontains=str('{q}'))"
             q_obj = eval(str_q)
             q_objects |= q_obj
-    return get_sb_data(queryset,q_objects)
+    data = queryset.filter(q_objects)
+    for d in data:
+        d_objects.append({
+            "id": d.pk,
+            "text": d.__str__()
+        })
+    return JsonResponse({"results":d_objects},safe=False)
 
 
 def get_sb_projects_data(request):
     if request.user.is_anonymous:
         return JsonResponse({"results":[]},safe=False)
-    queryset = Project.objects.select_related('category__profile').filter(category__profile_id=request.user.profile)
+    queryset = Project.objects.prefetch_related('company__profiles').filter(company__profiles=request.user.profile)
     q_objects = Q()
+    d_objects = []
     q = request.GET.get('search')
-    for f in  Project._meta.get_fields():
+    for f in  Category._meta.get_fields():
         if f.__class__.__name__  in ['CharField', 'TextField']:
             str_q = f"Q({f.name}__icontains=str('{q}'))"
             q_obj = eval(str_q)
             q_objects |= q_obj
-    return get_sb_data(queryset,q_objects)
+    data = queryset.filter(q_objects)
+    for d in data:
+        d_objects.append({
+            "id": d.pk,
+            "text": d.__str__()
+        })
+    return JsonResponse({"results":d_objects},safe=False)
 
 
 def get_tasks_for_sb(request):
@@ -41,8 +55,8 @@ def get_tasks_for_sb(request):
         return JsonResponse(results, safe=False)
     search = request.GET.get('search')
     if search and search != '':
-        data = Task.objects.select_related('project__category__profile').filter(
-            Q(name__icontains=search),project__category__profile_id=request.user.profile.pk
+        data = Task.objects.prefetch_related('company__profiles').filter(
+            Q(name__icontains=search),company__profiles=request.user.profile.pk
         ).values('id', 'name')
         for d in data:
             results.append({'id':d['id'], "text": d['name']})

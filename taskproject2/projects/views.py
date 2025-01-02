@@ -56,7 +56,7 @@ class CategoryDetailView(LoginRequiredMixin,ModelMixin,DetailView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.filter(profile_id=self.request.user.profile.id)
+        queryset = queryset.prefetch_related('company__profiles').filter(company__profiles=self.request.user.profile.id)
         return queryset
 
 
@@ -78,7 +78,7 @@ class CategoryUpdateView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,FormMixi
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.filter(profile_id=self.request.user.profile.id)
+        queryset = queryset.prefetch_related('company__profiles').filter(company__profiles=self.request.user.profile.id)
         return queryset
 
 
@@ -89,21 +89,19 @@ class CategoryDeleteView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,AjaxDele
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.filter(profile_id=self.request.user.profile.id)
+        queryset = queryset.prefetch_related('company__profiles').filter(company__profiles=self.request.user.profile.id)
         return queryset
-
 
 
 class ProjectListView(BaseListView):
 
     model = Project
     paginate_by = 100  # if pagination is desired
-    queryset = Project.objects.select_related('category__profile', 'parent')
+    queryset = Project.objects.prefetch_related('company__profiles').select_related('parent')
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.filter(
-                category__profile_id=self.request.user.profile.pk)
+        queryset = queryset.filter(company__profiles=self.request.user.profile.id)
         category = self.request.GET.get('category')
         parent = self.request.GET.get('parent')
         if category:
@@ -121,12 +119,12 @@ class ProjectListView(BaseListView):
 
 class ProjectDetailView(LoginRequiredMixin,DetailView):
     model = Project
-    queryset = Project.objects.select_related('category__profile')
+    queryset = Project.objects.prefetch_related('company__profiles')
+
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.filter(
-                category__profile_id=self.request.user.profile.pk)
+        queryset = queryset.prefetch_related('company__profiles').filter(company__profiles=self.request.user.profile.id)
         return queryset
 
 
@@ -140,24 +138,24 @@ class ProjectCreateView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,FormMixin
 class ProjectUpdateView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,FormMixin, UpdateView):
     model = Project
     form_class = ProjectForm
-    queryset = Project.objects.select_related('category__profile')
+    queryset = Project.objects.prefetch_related('company__profiles')
+
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.filter(
-                category__profile_id=self.request.user.profile.pk)
+        queryset = queryset.prefetch_related('company__profiles').filter(company__profiles=self.request.user.profile.id)
         return queryset
 
 
 class ProjectDeleteView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,AjaxDeleteMixin,DeleteView):
     model = Project
     ajax_partial = 'partials/ajax_delete_modal.html'
-    queryset = Project.objects.select_related('category__profile')
+    queryset = Project.objects.prefetch_related('company__profiles')
+
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.filter(
-                category__profile_id=self.request.user.profile.pk)
+        queryset = queryset.prefetch_related('company__profiles').filter(company__profiles=self.request.user.profile.id)
         return queryset
 
 
