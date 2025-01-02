@@ -46,6 +46,10 @@ class Task(Timestamped):
         default_related_name = 'tasks'
         verbose_name = 'task'
         verbose_name_plural = 'tasks'
+        indexes = [
+            models.Index(fields=['start_date']),
+            models.Index(fields=['end_date']),
+        ]
 
     def __str__(self):
         return self.name
@@ -99,6 +103,7 @@ class Predecessor(Timestamped):
         ]
         indexes = [
             models.Index(fields=['from_task', 'to_task']),
+            models.Index(fields=['start_type']),  # Add index for start_type
         ]
     def clean(self):
         super().clean()
