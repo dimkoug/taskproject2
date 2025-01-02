@@ -1,4 +1,5 @@
 import datetime
+import plotly.express as px
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.template.loader import render_to_string
@@ -14,7 +15,7 @@ from core.functions import is_ajax
 from core.mixins import PaginationMixin, ModelMixin, SuccessUrlMixin,FormMixin,QueryMixin, AjaxDeleteMixin
 
 from .models import Category, Project, Task, Predecessor, CPMReport,CPMReportData
-from .forms import CategoryForm, ProjectForm, TaskForm, PredecessorFormSet
+from .forms import CategoryForm, ProjectForm, TaskForm, PredecessorFormSet,GanttFilterForm
 from .calculate_critical_path import calculate_cpm
 
 
@@ -364,3 +365,52 @@ class CPMReportDetailView(LoginRequiredMixin,DetailView):
         queryset = queryset.filter(
                 project__company__profiles=self.request.user.profile.pk)
         return queryset
+    
+
+def gantt_chart_view(request, project_id):
+    # Fetch the project
+    project = Project.objects.get(id=project_id)
+    
+    # Get filters from the request
+    form = GanttFilterForm(request.GET or None)
+    
+    # Base query
+    tasks = Task.objects.filter(project_id=project_id).order_by('start_date')
+    
+    # Apply filters if the form is valid
+    if form.is_valid():
+        if form.cleaned_data.get('category'):
+            tasks = tasks.filter(project__category=form.cleaned_data['category'])
+        if form.cleaned_data.get('start_date'):
+            tasks = tasks.filter(start_date__gte=form.cleaned_data['start_date'])
+        if form.cleaned_data.get('end_date'):
+            tasks = tasks.filter(end_date__lte=form.cleaned_data['end_date'])
+    
+    # Prepare data for Gantt chart
+    chart_data = []
+    for task in tasks:
+        chart_data.append({
+            'Task': task.name,
+            'Start': task.start_date,
+            'Finish': task.end_date,
+            'Predecessors': ', '.join([pred.name for pred in task.predecessors.all()]) if task.predecessors.exists() else None,
+        })
+    
+    # Create the Gantt chart
+    fig = px.timeline(
+        chart_data, 
+        x_start="Start", 
+        x_end="Finish", 
+        y="Task", 
+        title=f"Gantt Chart for {project.name}",
+        labels={"Task": "Tasks"},
+        color_discrete_sequence=["#636EFA"]
+    )
+    fig.update_yaxes(categoryorder="total ascending")
+    gantt_chart_html = fig.to_html(full_html=False)
+
+    # Render the template with the form and chart
+    return render(request, 'gantt_chart.html', {
+        'form': form,
+        'gantt_chart': gantt_chart_html,
+    })

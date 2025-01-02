@@ -74,3 +74,21 @@ class PredecessorBootstrapFormSet(BootstrapFormSet):
 PredecessorFormSet = inlineformset_factory(Task, Predecessor, form=PredecessorForm, formset=PredecessorBootstrapFormSet,
                                            can_delete=True,
                                            fk_name='from_task')
+
+
+class GanttFilterForm(forms.Form):
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.all(),
+        required=False,
+        label="Category"
+    )
+    start_date = forms.DateField(
+        widget=forms.TextInput(attrs={'type': 'date'}),
+        required=False,
+        label="Start Date"
+    )
+    end_date = forms.DateField(
+        widget=forms.TextInput(attrs={'type': 'date'}),
+        required=False,
+        label="End Date"
+    )

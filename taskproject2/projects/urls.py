@@ -28,6 +28,7 @@ from .views import (
 
     CPMReportListView,
     CPMReportDetailView,
+    gantt_chart_view,
 )
 
 app_name = 'projects'
@@ -59,5 +60,7 @@ urlpatterns = [
     path('get_sb_projects_data/', get_sb_projects_data, name='sb-projects'),
     path('get_sb_categories_data/', get_sb_categories_data, name='sb-categories'),
     path('get_tasks_for_sb/', get_tasks_for_sb, name='get_tasks_for_sb'),
+
+    path('gantt-chart/<int:project_id>/', gantt_chart_view, name='gantt_chart'),
 
 ]
