@@ -95,7 +95,7 @@ class ModelMixin:
         model_name = model.__name__.lower()
         title = model._meta.verbose_name_plural.capitalize()
         back_url = reverse_lazy("{}:{}-list".format(app, model_name))
-        create_url = reverse_lazy("{}:{}-create".format(app, model_name))
+        create_url = reverse_lazy("{}:{}-add".format(app, model_name))
         context['app'] = app
         context['model'] = model
         context['model_name'] = model_name
@@ -144,13 +144,13 @@ class FormMixin:
     def form_valid(self, form):
         if 'continue' in self.request.POST:
             form.save()
-            return redirect(reverse_lazy('{}:{}-update'.format(
+            return redirect(reverse_lazy('{}:{}-change'.format(
                 form.instance._meta.app_label,
                 form.instance.__class__.__name__.lower()),
                 kwargs={'pk': form.instance.pk}))
         if 'new' in self.request.POST:
             form.save()
-            return redirect(reverse_lazy('{}:{}-create'.format(
+            return redirect(reverse_lazy('{}:{}-add'.format(
                 form.instance._meta.app_label,
                 form.instance.__class__.__name__.lower())))
         return super().form_valid(form)

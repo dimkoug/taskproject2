@@ -14,9 +14,9 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from core.functions import is_ajax
 from core.mixins import PaginationMixin, ModelMixin, SuccessUrlMixin,FormMixin,QueryMixin, AjaxDeleteMixin
 
-from .models import Category, Project, Task, Predecessor, CPMReport,CPMReportData
-from .forms import CategoryForm, ProjectForm, TaskForm, PredecessorFormSet,GanttFilterForm
-from .calculate_critical_path import calculate_cpm
+from projects.models import Category, Project, Task, Predecessor, CPMReport,CPMReportData
+from projects.forms import CategoryForm, ProjectForm, TaskForm, PredecessorFormSet,GanttFilterForm
+from projects.calculate_critical_path import calculate_cpm
 
 
 class BaseListView(PaginationMixin, ModelMixin, LoginRequiredMixin, ListView):

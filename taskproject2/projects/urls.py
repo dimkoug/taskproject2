@@ -35,21 +35,21 @@ app_name = 'projects'
 
 urlpatterns = [
     path('', ProjectListView.as_view(), name="project-list"),
-    path('detail/<int:pk>/', ProjectDetailView.as_view(), name="project-detail"),
-    path('create/', ProjectCreateView.as_view(), name="project-create"),
-    path('update/<int:pk>/', ProjectUpdateView.as_view(), name="project-update"),
+    path('view/<int:pk>/', ProjectDetailView.as_view(), name="project-view"),
+    path('add/', ProjectCreateView.as_view(), name="project-add"),
+    path('change/<int:pk>/', ProjectUpdateView.as_view(), name="project-change"),
     path('delete/<int:pk>/', ProjectDeleteView.as_view(), name="project-delete"),
 
     path('categories/', CategoryListView.as_view(), name="category-list"),
-    path('categories/detail/<int:pk>/', CategoryDetailView.as_view(), name="category-detail"),
-    path('categories/create', CategoryCreateView.as_view(), name="category-create"),
-    path('categories/update/<int:pk>/', CategoryUpdateView.as_view(), name="category-update"),
+    path('categories/view/<int:pk>/', CategoryDetailView.as_view(), name="category-view"),
+    path('categories/add/', CategoryCreateView.as_view(), name="category-add"),
+    path('categories/change/<int:pk>/', CategoryUpdateView.as_view(), name="category-change"),
     path('categories/delete/<int:pk>/', CategoryDeleteView.as_view(), name="category-delete"),
 
     path('tasks/', TaskListView.as_view(), name="task-list"),
-    path('tasks/detail/<int:pk>/', TaskDetailView.as_view(), name="task-detail"),
-    path('tasks/create/', TaskCreateView.as_view(), name="task-create"),
-    path('tasks/update/<int:pk>/', TaskUpdateView.as_view(), name="task-update"),
+    path('tasks/view/<int:pk>/', TaskDetailView.as_view(), name="task-view"),
+    path('tasks/add/', TaskCreateView.as_view(), name="task-add"),
+    path('tasks/change/<int:pk>/', TaskUpdateView.as_view(), name="task-change"),
     path('tasks/delete/<int:pk>/', TaskDeleteView.as_view(), name="task-delete"),
 
 

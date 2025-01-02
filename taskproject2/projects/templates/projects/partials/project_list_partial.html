@@ -15,7 +15,7 @@
             <tbody>
               {% for obj in object_list %}
               <tr>
-                <td>{{obj}}</td>
+                <td><a href="{% url 'projects:project-view' obj.id %}">{{obj}}</a></td>
                 <td>{{obj.category}}</td>
                 <td>{{obj.parent|default_if_none:"---"}}</td>
                 <td>

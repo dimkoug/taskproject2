@@ -208,23 +208,20 @@ def get_title(context):
     return {"title":model._meta.verbose_name_plural.capitalize()}
 
 @register.simple_tag
-def get_detail_url(obj, app=None):
-    if not app:
-        app = obj._meta.app_label
-    url = reverse(f"{app}:{obj.__class__.__name__.lower()}-detail",kwargs={"pk":obj.pk})
+def get_detail_url(obj):
+    app = obj._meta.app_label
+    url = reverse(f"{app}:{obj.__class__.__name__.lower()}-view",kwargs={"pk":obj.pk})
     return url
 
 @register.simple_tag
-def get_edit_url(obj, app=None):
-    if not app:
-        app = obj._meta.app_label
-    url = reverse(f"{app}:{obj.__class__.__name__.lower()}-update",kwargs={"pk":obj.pk})
+def get_edit_url(obj):
+    app = obj._meta.app_label
+    url = reverse(f"{app}:{obj.__class__.__name__.lower()}-change",kwargs={"pk":obj.pk})
     return url
 
 @register.simple_tag
-def get_delete_url(obj, app=None):
-    if not app:
-        app = obj._meta.app_label
+def get_delete_url(obj):
+    app = obj._meta.app_label
     url = reverse(f"{app}:{obj.__class__.__name__.lower()}-delete",kwargs={"pk":obj.pk})
     return url
 
