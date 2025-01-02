@@ -292,7 +292,7 @@ class TaskDeleteView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,AjaxDeleteMi
 class CPMReportListView(PaginationMixin, ModelMixin, LoginRequiredMixin, ListView):
     model = CPMReport
     paginate_by = 10  # if pagination is desired
-    queryset = CPMReport.objects.select_related('project__category__profile')
+    queryset = CPMReport.objects.prefetch_related('project__company__profiles')
 
     def dispatch(self, *args, **kwargs):
         self.ajax_partial = '{}/partials/{}_list_partial.html'.format(self.model._meta.app_label,self.model.__name__.lower())
@@ -303,9 +303,9 @@ class CPMReportListView(PaginationMixin, ModelMixin, LoginRequiredMixin, ListVie
         project_id = request.GET.get('project')
         if project_id:
             try:
-                project = Project.objects.select_related('category__profile').get(category__profile_id=self.request.user.profile.pk,id=project_id)
+                project = Project.objects.prefetch_related('company__profiles').get(company__profiles=self.request.user.profile.pk,id=project_id)
                 title = 'Cpm report'
-                tasks = Task.objects.select_related('project__category__profile').prefetch_related('predecessors').filter(project_id=project.pk)
+                tasks = Task.objects.prefetch_related('project__company__profiles','predecessors').filter(project_id=project.pk)
                 cpmreport = CPMReport.objects.create(
                     name=title,
                     project=project
@@ -345,7 +345,7 @@ class CPMReportListView(PaginationMixin, ModelMixin, LoginRequiredMixin, ListVie
     def get_queryset(self):
         queryset = super().get_queryset()
         queryset = queryset.filter(
-                project__category__profile_id=self.request.user.profile.pk)
+                project__company__profiles=self.request.user.profile.pk)
         return queryset
 
     def get_context_data(self, *args, **kwargs):
@@ -357,10 +357,10 @@ class CPMReportListView(PaginationMixin, ModelMixin, LoginRequiredMixin, ListVie
 
 class CPMReportDetailView(LoginRequiredMixin,DetailView):
     model = CPMReport
-    queryset = CPMReport.objects.select_related('project__category__profile').prefetch_related('cpmreportdata_set__task__predecessors')
+    queryset = CPMReport.objects.prefetch_related('project__company__profiles','cpmreportdata_set__task__predecessors')
 
     def get_queryset(self):
         queryset = super().get_queryset()
         queryset = queryset.filter(
-                project__category__profile_id=self.request.user.profile.pk)
+                project__company__profiles=self.request.user.profile.pk)
         return queryset

@@ -17,7 +17,7 @@
                 <div class="tab-content">
                     <div class="tab-pane active" id="info" role="tabpanel" aria-labelledby="info-tab" tabindex="0">
                         <div class="row">
-                            <div class="col-6">
+                            <div class="col-4">
                               <div class="form-group">
                                 {{ form.category.label_tag }}
                                 {{form.category}}
@@ -31,7 +31,22 @@
                                 {% endif %}
                               </div>
                             </div>
-                            <div class="col-6">
+                            <div class="row">
+                              <div class="col-4">
+                                <div class="form-group">
+                                  {{ form.company.label_tag }}
+                                  {{form.company}}
+                                  {% if form.company.errors %}
+                                  <div class="invalid-feedback">
+                                    {{form.company.errors}}
+                                  </div>
+                                  {%endif%}
+                                  {% if form.company.help_text %}
+                                    <small class="form-text text-muted">{{ form.company.help_text }}</small>
+                                  {% endif %}
+                                </div>
+                              </div>
+                            <div class="col-4">
                               <div class="form-group">
                                 {{ form.parent.label_tag }}
                                 {{form.parent}}
