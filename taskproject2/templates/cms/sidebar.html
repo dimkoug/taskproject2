@@ -37,13 +37,13 @@
       </div>
   </li>
     <li class="nav-item">
-      <a class="nav-link collapsed" href="#submenu-dms" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="submenu1">
-          DMS
+      <a class="nav-link collapsed" href="#submenu-projects" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="submenu1">
+          Projects
       </a>
-      <div class="collapse" id="submenu-dms">
+      <div class="collapse" id="submenu-projects">
           <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-              <li><a href="{% url 'dms:document-list' %}" class="nav-link">Documents</a></li>
-              <li><a href="{% url 'dms:folder-list' %}" class="nav-link">Folders</a></li>
+              <li><a href="{% url 'projects:category-list' %}" class="nav-link">Categories</a></li>
+              <li><a href="{% url 'projects:project-list' %}" class="nav-link">Projects</a></li>
           </ul>
       </div>
   </li>

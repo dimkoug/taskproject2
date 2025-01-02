@@ -19,13 +19,16 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from core.utils import delete_item
-
+from invitations.functions import activate_invite
 
 from .views import IndexView
 
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
+    path('activate/invitation/<str:uidb64>/<str:token>/', activate_invite, name='activate-invite'),
     path('projects/', include('projects.urls',namespace='projects')),
+    path('companies/', include('companies.urls',namespace='companies')),
+    path('invitations/', include('invitations.urls',namespace='invitations')),
     path('delete/', delete_item, name='delete'),
     path('users/', include('users.urls')),
     path('users/api/', include('users.api.routers')),
