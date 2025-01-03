@@ -8,9 +8,9 @@ app_name = 'companies'
 
 urlpatterns = [
     path('',views.CompanyListView.as_view(),name='company-list'),
-    path('create/',views.CompanyCreateView.as_view(),name='company-create'),
-    path('detail/<int:pk>/',views.CompanyDetailView.as_view(),name='company-detail'),
-    path('update/<int:pk>/',views.CompanyUpdateView.as_view(),name='company-update'),
+    path('add/',views.CompanyCreateView.as_view(),name='company-add'),
+    path('view/<int:pk>/',views.CompanyDetailView.as_view(),name='company-view'),
+    path('change/<int:pk>/',views.CompanyUpdateView.as_view(),name='company-change'),
     path('delete/<int:pk>/',views.CompanyDeleteView.as_view(),name='company-delete'),
 
     path('activate/profile/<int:company_id>/int<user_id>/',functions.activate_company_profile,name='activate-profile'),

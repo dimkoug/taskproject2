@@ -197,7 +197,7 @@ def add_button(context, app=None):
     if not app:
         app = model._meta.app_label
     
-    url = reverse(f"{app}:{model.__name__.lower()}-create")
+    url = reverse(f"{app}:{model.__name__.lower()}-add")
     return {"url":url}
 
 
