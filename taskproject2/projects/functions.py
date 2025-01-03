@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 from core.functions import get_sb_data
 from projects.models import Category,Project, Task
+from projects.forms import TaskForm
 
 
 def get_sb_categories_data(request):
@@ -63,3 +64,9 @@ def get_tasks_for_sb(request):
         # j_data = serializers.serialize("json", data, fields=('erp_code', 'title'))
         # return JsonResponse(j_data, safe=False)
     return JsonResponse({"results": results}, safe=False)
+
+
+
+def add_task(request,project_id):
+    project = Project.objects.prefetch_related('company__profiles').get(id=project_id,company__profiles=request.user.profile)
+    task = TaskForm(initial={"company":project.company,"project":project})

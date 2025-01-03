@@ -14,10 +14,10 @@
             <tbody>
               {% for obj in object_list %}
               <tr>
-                <td><a href="{% get_url 'detail' obj %}">{{obj}}</a></td>
+                <td><a href="{% get_detail_url  obj %}">{{obj}}</a></td>
                 <td><a href="{% url 'projects:project-list' %}?category={{obj.pk}}">Projects</a></td>
                 <td>
-                  {% include 'partials/action_buttons.html' with obj=obj %}
+                  {% include 'partials/_action_buttons.html' with obj=obj %}
                 </td>
               </tr>
               {% endfor %}
