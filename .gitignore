@@ -9,4 +9,4 @@ migrations
 env
 settings_local.py
 public
-activate.ps1
+
