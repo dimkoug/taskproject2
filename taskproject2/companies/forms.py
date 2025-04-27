@@ -1,27 +1,13 @@
 from django import forms
-from django.db.models import Prefetch
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from core.forms import BootstrapForm
 
 
-from core.widgets import CustomSelectMultipleWithUrl, CustomSelectWithQueryset
-
-from profiles.models import Profile
 from companies.models import Company
-
-
-class BootstrapForm:
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        fields = ['CheckboxInput', 'ClearableFileInput', 'FileInput']
-        for field in self.fields:
-            widget_name = self.fields[field].widget.__class__.__name__
-            if widget_name not in fields:
-                self.fields[field].widget.attrs.update({
-                    'class': 'form-control'
-                })
-
-
+from django.db.models import Prefetch
+from profiles.models import Profile
+from core.widgets import CustomSelectMultipleWithUrl, CustomSelectWithQueryset
 def get_app_permissions(app_labels):
     """
     Retrieve permissions for specified apps.
@@ -53,8 +39,7 @@ class PermissionSelectForm(BootstrapForm,forms.Form):
         if app_labels:
             # Update the queryset with permissions for the specified apps
             self.fields['permissions'].queryset = get_app_permissions(app_labels)
-
-
+            
 
 class CompanyFieldMixin(BootstrapForm, forms.ModelForm):
     company = forms.ModelChoiceField(widget=CustomSelectWithQueryset(ajax_url='/companies/sb/'),required=False,queryset=Company.objects.none())
@@ -66,7 +51,14 @@ class CompanyFieldMixin(BootstrapForm, forms.ModelForm):
         super().__init__(*args, **kwargs)
         user = request.user
         user_profile = user.profile
-
+        print(user.profile.companies.all())
+        queryset = Company.objects.prefetch_related(
+            Prefetch(
+                'profiles',
+                queryset=Profile.objects.filter(user=request.user),
+                to_attr='user_profiles'
+            )
+        ).filter(profiles=request.user.profile)
         if 'company' in self.data:
             if user.is_superuser:
                 queryset = Company.objects.all()
@@ -74,10 +66,10 @@ class CompanyFieldMixin(BootstrapForm, forms.ModelForm):
                 queryset = Company.objects.prefetch_related(
                 Prefetch(
                     'profiles',
-                    queryset=Profile.objects.filter(user=self.request.user),
+                    queryset=Profile.objects.filter(user=request.user),
                     to_attr='user_profiles'
                 )
-            ).filter(profiles=self.request.user.profile)
+            ).filter(profiles__in=request.user.profile)
         elif self.instance.pk:
             if user.is_superuser:
                 queryset = self.instance.companies.all()
@@ -85,11 +77,9 @@ class CompanyFieldMixin(BootstrapForm, forms.ModelForm):
                 queryset = Company.objects.prefetch_related(
                 Prefetch(
                     'profiles',
-                    queryset=Profile.objects.filter(user=self.request.user),
+                    queryset=Profile.objects.filter(user=request.user),
                     to_attr='user_profiles'
                 )
-            ).filter(profiles=self.request.user.profile,id=self.instance.company_id)
-        else:
-            queryset = Company.objects.none()
-
+            ).filter(profiles=request.user.profile,id=self.instance.company_id)
+        print(queryset)
         self.fields['company'].queryset = queryset

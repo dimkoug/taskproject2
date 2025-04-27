@@ -1,54 +1,63 @@
-{% extends "cms/base.html" %}
+{% extends "layouts/base.html" %}
 {% block page_title %}{{page_title}}{% endblock %}
 
 
 
 {% block content %}
-  <div class="row py-2">
-    <div class="col">
-      <h1>{{object}}</h1>
-    </div>
-  </div>
-  <div class="row py-2">
-    <div class="col">
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Task</th>
-            <th>Predecessors</th>
-            <th>Start date</th>
-            <th>End date</th>
-            <th>Duration</th>
-            <th>ES</th>
-            <th>EF</th>
-            <th>LS</th>
-            <th>LF</th>
-            <th>SLACK</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for d in object.cpmreportdata_set.all %}
-          <tr  {% if d.slack == 0 %} class="table-danger" {% endif %}>
-            <td>{{d.task}}</td>
-            <td>
-              {% for p in d.task.predecessors.all %}
-                {{p}}
+  <div class="card">
+    <div class="card-body">
+      <div class="row py-2">
+        <div class="col">
+          <h1>{{object}}</h1>
+        </div>
+      </div>
+      <div class="row py-2">
+        <div class="col">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Predecessors</th>
+                <th>Start date</th>
+                <th>End date</th>
+                <th>Duration</th>
+                <th>ES</th>
+                <th>EF</th>
+                <th>LS</th>
+                <th>LF</th>
+                <th>SLACK</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for d in object.cpmreportdata_set.all %}
+              <tr  {% if d.slack == 0 %} class="table-danger" {% endif %}>
+                <td>{{d.task}}</td>
+                <td>
+                  {% for p in d.task.predecessors.all %}
+                    {{p}}
+                  {% endfor %}
+                </td>
+                <td>{{d.task.start_date|date:"Y/m/d"}}</td>
+                <td>{{d.task.end_date|date:"Y/m/d"}}</td>
+                <td>{{d.task.duration}}</td>
+                <td>{{d.es}}</td>
+                <td>{{d.ef}}</td>
+                <td>{{d.ls}}</td>
+                <td>{{d.lf}}</td>
+                <td>{{d.slack}}</td>
+              </tr>
               {% endfor %}
-            </td>
-            <td>{{d.task.start_date|date:"Y/m/d"}}</td>
-            <td>{{d.task.end_date|date:"Y/m/d"}}</td>
-            <td>{{d.task.duration}}</td>
-            <td>{{d.es}}</td>
-            <td>{{d.ef}}</td>
-            <td>{{d.ls}}</td>
-            <td>{{d.lf}}</td>
-            <td>{{d.slack}}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
+
+
   </div>
+
+
+
 {% endblock %}
 
 

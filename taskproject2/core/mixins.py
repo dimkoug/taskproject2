@@ -30,7 +30,7 @@ class FormInvalidMixin:
 
 class AjaxMixin:
     def dispatch(self, *args, **kwargs):
-        self.ajax_partial = '{}/partials/{}_list_partial.html'.format(self.model._meta.app_label,self.model.__name__.lower())
+        self.ajax_partial = '{}/partials/{}_list.html'.format(self.model._meta.app_label,self.model.__name__.lower())
         return super().dispatch(*args, **kwargs)
     def get(self, request, *args, **kwargs):
         try:
@@ -94,8 +94,8 @@ class ModelMixin:
         app = model._meta.app_label
         model_name = model.__name__.lower()
         title = model._meta.verbose_name_plural.capitalize()
-        back_url = reverse_lazy("{}:{}-list".format(app, model_name))
-        create_url = reverse_lazy("{}:{}-add".format(app, model_name))
+        back_url = reverse("{}:{}_list".format(app, model_name))
+        create_url = reverse("{}:{}_add".format(app, model_name))
         context['app'] = app
         context['model'] = model
         context['model_name'] = model_name
@@ -144,13 +144,13 @@ class FormMixin:
     def form_valid(self, form):
         if 'continue' in self.request.POST:
             form.save()
-            return redirect(reverse_lazy('{}:{}-change'.format(
+            return redirect(reverse_lazy('{}:{}_change'.format(
                 form.instance._meta.app_label,
                 form.instance.__class__.__name__.lower()),
                 kwargs={'pk': form.instance.pk}))
         if 'new' in self.request.POST:
             form.save()
-            return redirect(reverse_lazy('{}:{}-add'.format(
+            return redirect(reverse_lazy('{}:{}_add'.format(
                 form.instance._meta.app_label,
                 form.instance.__class__.__name__.lower())))
         return super().form_valid(form)
@@ -170,7 +170,7 @@ class FormMixin:
 
 class SuccessUrlMixin:
     def get_success_url(self):
-        return reverse_lazy('{}:{}-list'.format(
+        return reverse_lazy('{}:{}_list'.format(
             self.model._meta.app_label, self.model.__name__.lower()))
 
 
@@ -207,12 +207,12 @@ class PaginationMixin:
         else:  # case 3
             pages = [x for x in range(page_no - 5, page_no + 6)]
         
-        try:
-            context['fields'] = self.fields
-            table = get_rows(self.fields,current_page)
-            context['table'] = table
-        except:
-            raise
+        # try:
+        #     context['fields'] = self.fields
+        #     table = get_rows(self.fields,current_page)
+        #     context['table'] = table
+        # except:
+        #     raise
         context.update({'pages': pages})
         return context
 

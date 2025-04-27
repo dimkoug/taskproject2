@@ -14,7 +14,7 @@ User = get_user_model()
 
 
 class UserCreationForm(BootstrapForm, BaseUserCreationForm):
-    birth_date = forms.DateField(help_text='Required. Format: YYYY-MM-DD',required=False)
+    birth_date = forms.DateField(help_text='Required. Format: YYYY-MM-DD')
     email = forms.EmailField(max_length=254, help_text='Required. Inform a valid email address.')
     company = forms.CharField(max_length=255, required=False)
     class Meta:

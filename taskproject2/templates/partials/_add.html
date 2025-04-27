@@ -1,5 +1,7 @@
-{% load cms %}
-<div class="row">
-  <a class="btn btn-primary pull-right" href="{% url_create model 'create' %}"><i class="fa fa-plus" aria-hidden="true"></i>Add {{model_name}}</a>
-</div>
-<hr>
+<div class="d-flex flex-row py-2">
+    <div class="col">
+      <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <a href="{{view.add_url}}" class="btn btn-primary">Add</a>
+    </div>
+    </div>
+  </div>

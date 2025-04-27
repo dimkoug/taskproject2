@@ -1,12 +1,22 @@
-{% extends "cms/base.html" %}
+{% extends "layouts/base.html" %}
 {% load core %}
 
 {% block content %}
 
-<form method="post">{% csrf_token %}
-	{% include 'partials/_form.html' %}
-	{% get_form_buttons form %}
-</form>
+<div class="card">
+	<div class="card-body">
+		{% include 'partials/_title.html' %}
+
+		<form method="post">{% csrf_token %}
+			{% include 'core/form.html' %}
+			{% get_form_buttons form %}
+		</form>
+	</div>
+
+</div>
+
+
+
 
 
 {% endblock content %}

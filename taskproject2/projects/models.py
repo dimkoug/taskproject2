@@ -19,7 +19,7 @@ class Category(Timestamped):
 
 class Project(Timestamped):
     company = models.ForeignKey("companies.Company", on_delete=models.CASCADE)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey("projects.Category", on_delete=models.CASCADE)
     parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     budget = models.DecimalField(max_digits=18, decimal_places=2,blank=True, null=True)
     name = models.CharField(max_length=100)
@@ -35,7 +35,7 @@ class Project(Timestamped):
 
 class Task(Timestamped):
     company = models.ForeignKey("companies.Company", on_delete=models.CASCADE)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey("projects.Project", on_delete=models.CASCADE)
     predecessors = models.ManyToManyField("self", through="Predecessor", through_fields=("from_task", "to_task"),symmetrical=False)
     name = models.CharField(max_length=100)
     budget = models.DecimalField(max_digits=18, decimal_places=2,blank=True, null=True)
@@ -93,8 +93,8 @@ class Predecessor(Timestamped):
         (FF, 'Finish to finsish'),
         (SF, 'Start to finish'),
     ]
-    from_task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='predecessor_tasks')
-    to_task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='successor_tasks')
+    from_task = models.ForeignKey("projects.Task", on_delete=models.CASCADE, related_name='predecessor_tasks')
+    to_task = models.ForeignKey("projects.Task", on_delete=models.CASCADE, related_name='successor_tasks')
     start_type = models.IntegerField(choices=PREDECESSOR_CHOICES)
 
     class Meta:
@@ -135,7 +135,7 @@ class Predecessor(Timestamped):
 
 class CPMReport(Timestamped):
     name = models.CharField(max_length=255)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey("projects.Project", on_delete=models.CASCADE)
 
 
     class Meta:
@@ -146,7 +146,7 @@ class CPMReport(Timestamped):
 
 
 class CPMReportData(Timestamped):
-    cpmreport = models.ForeignKey(CPMReport, on_delete=models.CASCADE)
+    cpmreport = models.ForeignKey("projects.CPMReport", on_delete=models.CASCADE)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     es = models.IntegerField(default=0)
     ef = models.IntegerField(default=0)

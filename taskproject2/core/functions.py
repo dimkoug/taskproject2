@@ -1,10 +1,12 @@
 import random
 import string
+from urllib.parse import urlparse
 from django.apps import apps
 from django.db.models import Q
 from django.db import models
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
+from django.conf import settings
 from django.urls import reverse,reverse_lazy, NoReverseMatch, resolve
 from django.utils.safestring import mark_safe
 from django.apps import apps
@@ -45,8 +47,22 @@ def get_pagination(request, queryset, items):
     return (paginator, paginator.num_pages, items_page)
 
 
+
 def is_ajax(request):
-    return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+    # Check if it's an AJAX request
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        origin = request.headers.get("Origin") or request.headers.get("Referer")
+        parsed_url = urlparse(origin)
+        ip = parsed_url.hostname
+        print("ajax origin:",ip)
+
+        if ip:
+            allowed_origins = getattr(settings, "ALLOWED_ORIGINS", [])
+            
+            if any(ip.startswith(allowed) for allowed in allowed_origins):
+                return True
+
+    return False
 
 
 def create_query_string(request):

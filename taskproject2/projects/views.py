@@ -11,35 +11,14 @@ from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 
+from core.views import *
+
 from core.functions import is_ajax
 from core.mixins import PaginationMixin, ModelMixin, SuccessUrlMixin,FormMixin,QueryMixin, AjaxDeleteMixin
 
 from projects.models import Category, Project, Task, Predecessor, CPMReport,CPMReportData
 from projects.forms import CategoryForm, ProjectForm, TaskForm, PredecessorFormSet,GanttFilterForm
 from projects.calculate_critical_path import calculate_cpm
-
-
-class BaseListView(PaginationMixin, ModelMixin, LoginRequiredMixin, ListView):
-    def dispatch(self, *args, **kwargs):
-        self.ajax_partial = '{}/partials/{}_list_partial.html'.format(self.model._meta.app_label,self.model.__name__.lower())
-        return super().dispatch(*args, **kwargs)
-    
-    def get(self, request, *args, **kwargs):
-        self.object_list = self.get_queryset()
-        context = self.get_context_data()
-        if is_ajax(request):
-            html_form = render_to_string(
-                self.ajax_partial, context, request)
-            return JsonResponse(html_form, safe=False)
-        return super().get(request, *args, **kwargs)
-
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        context['template'] = self.ajax_partial
-        context['search'] = self.request.GET.get('search','')
-        return context
-
-
 
 
 class CategoryListView(BaseListView,QueryMixin):
@@ -52,7 +31,7 @@ class CategoryListView(BaseListView,QueryMixin):
         return queryset
 
 
-class CategoryDetailView(LoginRequiredMixin,ModelMixin,DetailView):
+class CategoryDetailView(BaseDetailView):
     model = Category
 
     def get_queryset(self):
@@ -62,7 +41,7 @@ class CategoryDetailView(LoginRequiredMixin,ModelMixin,DetailView):
 
 
 
-class CategoryCreateView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,FormMixin, CreateView):
+class CategoryCreateView(BaseCreateView):
     model = Category
     form_class = CategoryForm
 
@@ -72,7 +51,7 @@ class CategoryCreateView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,FormMixi
         return super().form_valid(form)
 
 
-class CategoryUpdateView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,FormMixin, UpdateView):
+class CategoryUpdateView(BaseUpdateView):
     model = Category
     form_class = CategoryForm
 
@@ -84,7 +63,7 @@ class CategoryUpdateView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,FormMixi
 
 
 
-class CategoryDeleteView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,AjaxDeleteMixin,DeleteView):
+class CategoryDeleteView(BaseDeleteView):
     model = Category
     ajax_partial = 'partials/ajax_delete_modal.html'
 
@@ -118,7 +97,7 @@ class ProjectListView(BaseListView):
         context['search'] = self.request.GET.get('search','')
         return context
 
-class ProjectDetailView(LoginRequiredMixin,DetailView):
+class ProjectDetailView(BaseDetailView):
     model = Project
     queryset = Project.objects.prefetch_related('company__profiles')
 
@@ -129,14 +108,14 @@ class ProjectDetailView(LoginRequiredMixin,DetailView):
         return queryset
 
 
-class ProjectCreateView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,FormMixin, CreateView):
+class ProjectCreateView(BaseCreateView):
     model = Project
     form_class = ProjectForm
 
 
 
 
-class ProjectUpdateView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,FormMixin, UpdateView):
+class ProjectUpdateView(BaseUpdateView):
     model = Project
     form_class = ProjectForm
     queryset = Project.objects.prefetch_related('company__profiles')
@@ -148,7 +127,7 @@ class ProjectUpdateView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,FormMixin
         return queryset
 
 
-class ProjectDeleteView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,AjaxDeleteMixin,DeleteView):
+class ProjectDeleteView(BaseDeleteView):
     model = Project
     ajax_partial = 'partials/ajax_delete_modal.html'
     queryset = Project.objects.prefetch_related('company__profiles')
@@ -177,7 +156,7 @@ class TaskListView(BaseListView):
         context['search'] = self.request.GET.get('search','')
         return context
 
-class TaskDetailView(LoginRequiredMixin,DetailView):
+class TaskDetailView(BaseDetailView):
     model = Task
     queryset = Task.objects.select_related('project__category__profile')
 
@@ -188,7 +167,7 @@ class TaskDetailView(LoginRequiredMixin,DetailView):
         return queryset
 
 
-class TaskCreateView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,FormMixin, CreateView):
+class TaskCreateView(BaseCreateView):
     model = Task
     form_class = TaskForm
 
@@ -228,7 +207,7 @@ class TaskCreateView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,FormMixin, C
         return super().form_valid(form)
 
 
-class TaskUpdateView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,FormMixin, UpdateView):
+class TaskUpdateView(BaseUpdateView):
     model = Task
     form_class = TaskForm
     queryset = Task.objects.select_related('project__category__profile')
@@ -277,7 +256,7 @@ class TaskUpdateView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,FormMixin, U
         return super().form_valid(form)
 
 
-class TaskDeleteView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,AjaxDeleteMixin,DeleteView):
+class TaskDeleteView(BaseDeleteView):
     model = Task
     success_url = reverse_lazy('projects:task-list')
     ajax_partial = 'partials/ajax_delete_modal.html'
@@ -290,7 +269,7 @@ class TaskDeleteView(ModelMixin, LoginRequiredMixin,SuccessUrlMixin,AjaxDeleteMi
         return queryset
 
 
-class CPMReportListView(PaginationMixin, ModelMixin, LoginRequiredMixin, ListView):
+class CPMReportListView(BaseListView):
     model = CPMReport
     paginate_by = 10  # if pagination is desired
     queryset = CPMReport.objects.prefetch_related('project__company__profiles')
@@ -356,7 +335,7 @@ class CPMReportListView(PaginationMixin, ModelMixin, LoginRequiredMixin, ListVie
         return context
 
 
-class CPMReportDetailView(LoginRequiredMixin,DetailView):
+class CPMReportDetailView(BaseDetailView):
     model = CPMReport
     queryset = CPMReport.objects.prefetch_related('project__company__profiles','cpmreportdata_set__task__predecessors')
 

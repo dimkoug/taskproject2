@@ -6,12 +6,16 @@ from .settings_base import *
 This file is used to create a local settings_local.py file for development
 '''
 
-PAGINATED_ITEMS = 2
+
 
 DEBUG = True
 
 ADMIN_GROUP = 'admins'
 USERS_GROUP = 'users'
+
+PAGINATE_BY = 10
+
+ALLOWED_ORIGINS = ['127.0.0.1']
 
 
 DJANGO_DEVELOPMENT = True
@@ -99,7 +103,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'ENGINE': 'django.db.backends.postgresql',
 #         'NAME': '',
 #         'USER': 'postgres',
 #         'PASSWORD': '',
@@ -134,9 +138,9 @@ try:
     if os.name == 'nt':
         os.environ['PATH'] = os.path.join(VIRTUAL_ENV_DIR, r'.\Lib\site-packages\osgeo') + ';' + os.environ['PATH']
         os.environ['PROJ_LIB'] = os.path.join(VIRTUAL_ENV_DIR, r'.\Lib\site-packages\osgeo\data\proj') + ';' + os.environ['PATH']
-        GDAL_LIBRARY_PATH = os.path.join(VIRTUAL_ENV_DIR, r'.\Lib\site-packages\osgeo\gdal304.dll')
-
-        GDAL_LIBRARY_PATH = r'C:\Program Files\QGIS 3.40.1\bin\gdal309.dll'
-        GEOS_LIBRARY_PATH = r'C:\Program Files\QGIS 3.40.1\bin\geos_c.dll'
+        GDAL_LIBRARY_PATH = os.path.join(VIRTUAL_ENV_DIR, r'.\Lib\site-packages\osgeo\gdal.dll')
+        GEOS_LIBRARY_PATH = os.path.join(VIRTUAL_ENV_DIR, r'.\Lib\site-packages\osgeo\geos_c.dll')
 except:
     pass
+
+

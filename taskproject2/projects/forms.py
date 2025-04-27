@@ -11,11 +11,21 @@ class CategoryForm(BootstrapForm, forms.ModelForm):
         model = Category
         fields = ('name','company')
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request")
+        super().__init__(*args, **kwargs)
+
+
 
 class ProjectForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Project
         fields = ('category','parent','company', 'name','budget')
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request")
+        super().__init__(*args, **kwargs)
+
 
 
 class TaskForm(BootstrapForm, forms.ModelForm):
@@ -23,11 +33,21 @@ class TaskForm(BootstrapForm, forms.ModelForm):
         model = Task
         fields = ('project', 'name', 'start_date', 'end_date', 'budget')
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request")
+        super().__init__(*args, **kwargs)
+
+
 
 class PredecessorForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Predecessor
         fields = ('from_task', 'to_task','start_type')
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request")
+        super().__init__(*args, **kwargs)
+
 
 
 class PredecessorBootstrapFormSet(BootstrapFormSet):
@@ -92,3 +112,8 @@ class GanttFilterForm(forms.Form):
         required=False,
         label="End Date"
     )
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request")
+        super().__init__(*args, **kwargs)
+

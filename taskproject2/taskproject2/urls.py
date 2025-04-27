@@ -26,6 +26,7 @@ from .views import IndexView
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
     path('activate/invitation/<str:uidb64>/<str:token>/', activate_invite, name='activate-invite'),
+    path('accounts/', include('django.contrib.auth.urls')),
     path('projects/', include('projects.urls',namespace='projects')),
     path('companies/', include('companies.urls',namespace='companies')),
     path('invitations/', include('invitations.urls',namespace='invitations')),

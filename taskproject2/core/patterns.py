@@ -24,27 +24,45 @@ def get_patterns(app_name, filename):
             for model_name in model_names:
                 if value.__name__.startswith(model_name) and\
                             value.__name__ not in _views:
+                    
                     if isinstance(value, type):
+                        
+                        
                         if issubclass(value, ListView):
                             patterns += [path('{}/'.format(
                                 model_name.lower()), value.as_view(),
-                                name='{}-list'.format(model_name.lower()))]
+                                name=f'{model_name.lower()}_list')]
                         if issubclass(value, DetailView):
-                            patterns += [path('{}/<int:pk>/detail/'.format(
-                                model_name.lower()), value.as_view(),
-                                name='{}-detail'.format(model_name.lower()))]
+                            if value.pk_url_kwarg == 'pk':
+                                key = f"<int:{value.pk_url_kwarg}>"
+                            else:
+                                key = f"<str:{value.pk_url_kwarg}>"
+                            
+                            
+                            
+                            patterns += [path(f'{model_name.lower()}/view/{key}/', value.as_view(),
+                                name=f'{model_name.lower()}_view')]
                         if issubclass(value, CreateView):
-                            patterns += [path('{}/create/'.format(
+                            patterns += [path('{}/add/'.format(
                                 model_name.lower()), value.as_view(),
-                                name='{}-create'.format(model_name.lower()))]
+                                name=f'{model_name.lower()}_add')]
                         if issubclass(value, UpdateView):
-                            patterns += [path('{}/<int:pk>/update/'.format(
-                                model_name.lower()), value.as_view(),
-                                name='{}-update'.format(model_name.lower()))]
+                            if value.pk_url_kwarg == 'pk':
+                                key = f"<int:{value.pk_url_kwarg}>"
+                            else:
+                                key = f"<str:{value.pk_url_kwarg}>"
+                            
+                            patterns += [path(f'{model_name.lower()}/change/{key}/', value.as_view(),
+                                name=f'{model_name.lower()}_change')]
                         if issubclass(value, DeleteView):
-                            patterns += [path('{}/<int:pk>/delete/'.format(
-                                model_name.lower()), value.as_view(),
-                                name='{}-delete'.format(model_name.lower()))]
+                            if value.pk_url_kwarg == 'pk':
+                                key = f"<int:{value.pk_url_kwarg}>"
+                            else:
+                                key = f"<str:{value.pk_url_kwarg}>"
+                            
+                            
+                            patterns += [path(f'{model_name.lower()}/delete/{key}/', value.as_view(),
+                                name=f'{model_name.lower()}_delete')]
             _views.add(value.__name__)
 
     return patterns

@@ -1,0 +1,29 @@
+{% load core %}
+<div class="row py-2">
+    <div class="col">
+          <table class="table table-stripped">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Parent</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for obj in object_list %}
+              <tr>
+                <td><a href="{% url 'projects:project_view' obj.id %}">{{obj}}</a></td>
+                <td>{{obj.category}}</td>
+                <td>{{obj.parent|default_if_none:"---"}}</td>
+                <td>
+                  {% include 'partials/_action_buttons.html' with obj=obj %}
+                  <a href="{% url 'projects:cpmreport_list' %}?project={{obj.pk}}">Cpm reports</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+    </div>
+  </div>
+  {% include 'pagination.html' %}
