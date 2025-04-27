@@ -14,16 +14,17 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 import tempfile
 from django.conf import settings
 
+from django.http import HttpResponse
+from weasyprint import HTML
 
 
 from core.views import *
 
 from core.functions import is_ajax
-from core.mixins import PaginationMixin, ModelMixin, SuccessUrlMixin,FormMixin,QueryMixin, AjaxDeleteMixin
-
+from core.mixins import *
 from projects.models import *
 from projects.forms import *
-from projects.calculate_critical_path import *
+from projects.utils import *
 
 
 class CategoryListView(BaseListView,QueryMixin):
@@ -286,6 +287,13 @@ class TaskDeleteView(BaseDeleteView):
         return queryset
 
 
+
+
+    
+
+
+
+
 class CPMReportListView(BaseListView):
     model = CPMReport
     paginate_by = 10  # if pagination is desired
@@ -299,74 +307,8 @@ class CPMReportListView(BaseListView):
         self.object_list = self.get_queryset()
         project_id = request.GET.get('project')
         if project_id:
-            try:
-                project = Project.objects.prefetch_related('category__company__profiles').get(category__company__profiles=self.request.user.profile.pk,id=project_id)
-                title = 'Cpm report'
-                tasks = Task.objects.prefetch_related('project__category__company__profiles','successor_tasks').filter(project__category__company__profiles=self.request.user.profile.pk,project_id=project.pk)
-                cpmreport = CPMReport.objects.create(
-                    name=title,
-                    project=project
-                )
-                data = []
-                for task in tasks:
-                    activity = {}
-                    activity['activity'] = task.name
-                    activity['early_start'] = activity['es'] = task.early_start
-                    activity['late_start'] = activity['ls'] = task.late_start
-                    activity['early_finish'] = activity['ef'] = task.early_finish
-                    activity['duration'] = task.duration
-                    activity['predecessors'] = []
-                    for pr in task.successor_tasks.all():
-                        activity['predecessors'].append(pr.from_task.name)
-                    data.append(activity)
-                
-                temp_dir = os.path.join(settings.MEDIA_ROOT, 'tmp')
-                os.makedirs(temp_dir, exist_ok=True)
-                
-                graph_path = os.path.join(temp_dir, f"cpm_graph_{cpmreport.id}.png")
-                gantt_path = os.path.join(temp_dir, f"gantt_chart_{cpmreport.id}.png")
-                
-                
+            generate_cpm_report(self.request,project_id)
 
-                
-                
-                
-                critical_path = calculate_cpm(data)
-                for item in critical_path:
-                    print(item)
-                    CPMReportData.objects.create(
-                        cpmreport=cpmreport,
-                        task=Task.objects.get(name=item['activity']),
-                        slack=item['slack'],
-                        es = item['es'],
-                        ef = item['ef'],
-                        ls = item['ls'],
-                        lf = item['lf']
-                    )
-                critical_path_data = []
-                
-                for item in CPMReportData.objects.filter(cpmreport_id=cpmreport.id,slack=0):
-                    critical_path_data.append(item)
-                
-                critical_path = [activity['activity'] for activity in data if activity['slack'] == 0]
-                print(critical_path)
-                
-                draw_activity_graph(data,critical_path, save_path=graph_path)
-                draw_gantt_chart(data, critical_path,save_path=gantt_path)
-                               
-
-
-                with open(graph_path, 'rb') as graph_file:
-                    cpmreport.cpm_graph.save(os.path.basename(graph_path), File(graph_file))
-
-                with open(gantt_path, 'rb') as gantt_file:
-                    cpmreport.gantt_chart.save(os.path.basename(gantt_path), File(gantt_file))
-
-                cpmreport.save()
-            
-            
-            except Project.DoesNotExist:
-                pass
         context = self.get_context_data()
         if is_ajax(request):
             html_form = render_to_string(
@@ -480,3 +422,70 @@ def delete_predecessor(request,task,id):
     task = Task.objects.prefetch_related('predecessors').get(id=task)
     task.predecessors.remove(id)
     return redirect(reverse_lazy('projects:project_list'))
+
+
+
+def download_full_project_report_pdf(request, project_id):
+    project = Project.objects.prefetch_related('tasks').get(id=project_id)
+    tasks = project.tasks.all()
+
+    total_cost = sum(task.budget or 0 for task in tasks)
+    start_date = tasks.order_by('start_date').first().start_date
+    end_date = tasks.order_by('-end_date').first().end_date
+    # Get latest CPM report
+    cpm_report = CPMReport.objects.filter(project=project).order_by('-created').first()
+    # If no CPMReport exists yet, generate it first
+    data = generate_cpm_report(request, project.id)
+    if not cpm_report:
+        cpm_report = CPMReport.objects.filter(project=project).order_by('-created').first()
+    # Make sure critical_path image exists
+    critical_path_image_url = cpm_report.cpm_graph.url if cpm_report and cpm_report.cpm_graph else None
+
+    # Generate Gantt images if missing
+    gantt_folder = os.path.join(settings.MEDIA_ROOT, 'gantt_pages', f'project_{project.id}')
+    if not os.path.exists(gantt_folder) or not os.listdir(gantt_folder):
+        os.makedirs(gantt_folder, exist_ok=True)
+        # Prepare data for Gantt
+        cpm_data = []
+        for task in tasks:
+            cpm_data.append({
+                "activity": task.name,
+                "predecessors": [pred.from_task.name for pred in task.predecessor_tasks.all()],
+                "duration": (task.end_date - task.start_date).days,
+                "es": task.early_start,
+                "ef": task.early_finish,
+                "ls": task.late_start,
+                "lf": task.late_finish,
+                "slack": task.slack,
+            })
+
+        draw_paginated_gantt_chart(cpm_data, save_folder=gantt_folder, page_size=100)
+
+    # Now collect gantt images
+    gantt_images = []
+    if os.path.exists(gantt_folder):
+        for filename in sorted(os.listdir(gantt_folder)):
+            if filename.endswith('.png'):
+                gantt_images.append(f'/media/gantt_pages/project_{project.id}/{filename}')
+
+    print(gantt_images)
+    # Prepare context for HTML
+    context = {
+        'project': project,
+        'tasks': tasks,
+        'total_cost': total_cost,
+        'start_date': start_date,
+        'end_date': end_date,
+        'today': datetime.datetime.now().strftime('%Y-%m-%d'),
+        'critical_path_image_url': critical_path_image_url,
+        'gantt_images': gantt_images,
+    }
+
+    html_string = render_to_string('projects/full_project_report.html', context)
+    html = HTML(string=html_string, base_url=request.build_absolute_uri('/'))
+    pdf_file = html.write_pdf()
+
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{project.name}_full_report.pdf"'
+
+    return response

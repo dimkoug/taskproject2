@@ -19,6 +19,7 @@
                 <td>
                   {% include 'partials/_action_buttons.html' with obj=obj %}
                   <a href="{% url 'projects:cpmreport_list' %}?project={{obj.pk}}">Cpm reports</a>
+                  <a href="{% url 'projects:project-report' obj.pk %}">Project reports</a>
                 </td>
               </tr>
               {% endfor %}

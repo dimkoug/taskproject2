@@ -9,30 +9,6 @@ from .functions import (
 from . import views
 
 
-# from .views import (
-#     CategoryListView,
-#     CategoryDetailView,
-#     CategoryCreateView,
-#     CategoryUpdateView,
-#     CategoryDeleteView,
-
-#     ProjectListView,
-#     ProjectDetailView,
-#     ProjectCreateView,
-#     ProjectUpdateView,
-#     ProjectDeleteView,
-
-#     TaskListView,
-#     TaskDetailView,
-#     TaskCreateView,
-#     TaskUpdateView,
-#     TaskDeleteView,
-
-#     CPMReportListView,
-#     CPMReportDetailView,
-#     gantt_chart_view,
-# )
-
 app_name = 'projects'
 
 urlpatterns = get_patterns(app_name,'views') + [
@@ -43,7 +19,7 @@ urlpatterns = get_patterns(app_name,'views') + [
     path('add/predecessor/<int:task_id>/', views.add_predecessor, name='add-predecessor'),
 
     path('predecessor/delete/<int:task>/<int:id>/', views.delete_predecessor, name='predecessor_delete'),
-
+    path('project/report/<int:project_id>/',views.download_full_project_report_pdf,name="project-report"),
     path('gantt-chart/<int:project_id>/', views.gantt_chart_view, name='gantt_chart'),
 
 ]
