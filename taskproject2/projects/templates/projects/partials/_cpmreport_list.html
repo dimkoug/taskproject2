@@ -6,6 +6,8 @@
               <tr>
                 <th>Name</th>
                 <th>Project</th>
+                <th>Graph</th>
+                <th>Gantt</th>
                 <th>Created</th>
               </tr>
             </thead>
@@ -14,6 +16,18 @@
               <tr>
                 <td><a href="{% url 'projects:cpmreport_view' obj.pk %}">{{obj}}</a></td>
                 <td>{{obj.project}}</td>
+                <td>
+                  {% if obj.cpm_graph  %}
+                  <a href="{{obj.cpm_graph.url}}"><img src="{{obj.cpm_graph.url}}" alt="" style="width:150px;"></a>
+                  {% endif %}
+                
+                </td>
+                <td>
+                  {% if obj.gantt_chart %}
+                  <a href="{{obj.gantt_chart.url}}"><img src="{{obj.gantt_chart.url}}" alt="" style="width:150px;"></a>
+                  {% endif %}
+                
+                </td>
                 <td>{{obj.created|date:"d/m/Y"}}</td>
               </tr>
               {% endfor %}
