@@ -2,88 +2,100 @@
 {% load core %}
 
 {% block content %}
-  <div class="d-flex flex-row">
-    <div class="col">
-      <h2>{{object.name}}</h2>
-    </div>
-  </div>
-
-
-
-  <div class="d-flex flex-row">
-    <div class="col">
-      <ul class="nav nav-tabs" id="myTab" role="tablist">
-        <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">Tasks</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">Profile</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact-tab-pane" type="button" role="tab" aria-controls="contact-tab-pane" aria-selected="false">Contact</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="disabled-tab" data-bs-toggle="tab" data-bs-target="#disabled-tab-pane" type="button" role="tab" aria-controls="disabled-tab-pane" aria-selected="false" disabled>Disabled</button>
-        </li>
-      </ul>
-      <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">Tasks
-          <div class="d-flex flex-row">
-            <div class="col">
-              <a href="{% url 'projects:task_add' %}?project={{object.pk}}">Add task</a>
-            </div>
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex flex-row">
+        <div class="col">
+          <h2>{{object.name}}</h2>
+        </div>
+      </div>
+    
+    
+    
+      <div class="d-flex flex-row">
+        <div class="col">
+          <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">Tasks</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">Profile</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact-tab-pane" type="button" role="tab" aria-controls="contact-tab-pane" aria-selected="false">Contact</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="disabled-tab" data-bs-toggle="tab" data-bs-target="#disabled-tab-pane" type="button" role="tab" aria-controls="disabled-tab-pane" aria-selected="false" disabled>Disabled</button>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+              <div class="d-flex flex-row">
+                <div class="col py-2">
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <a href="{% url 'projects:task_add' %}?project={{object.pk}}" class="btn btn-primary">Add task</a>
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex flex-row">
+                <div class="col">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Duration</th>
+                        <th>Predecessors</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for obj in object.tasks.all %}
+                        <tr>
+                          <td>{{obj}}</td>
+                          <td>{{obj.duration}}</td>
+                          <td>
+                            <ul>
+                              {% for p in  obj.predecessors.all %}
+                              <li>{{p}}  <a href="{% url 'projects:predecessor_delete' obj.id p.pk %}">Delete</a>  </li>
+                              {% endfor %}
+                            </ul>
+                          </td>
+                          <td>
+                            <a href="{%url 'projects:task_change' obj.id %}">Edit Task</a>
+                            <a href="{%url 'projects:add-predecessor' obj.id %}">Add predecessor</a>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+    
+    
+    
+                  </table>
+                </div>
+              </div>
+    
+    
+    
+    
+            </div><!--tasks-->
+            <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">...</div>
+            <div class="tab-pane fade" id="contact-tab-pane" role="tabpanel" aria-labelledby="contact-tab" tabindex="0">...</div>
+            <div class="tab-pane fade" id="disabled-tab-pane" role="tabpanel" aria-labelledby="disabled-tab" tabindex="0">...</div>
           </div>
-          <div class="d-flex flex-row">
-            <div class="col">
-              <table class="table table-bordered">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Duration</th>
-                    <th>Predecessors</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for obj in object.tasks.all %}
-                    <tr>
-                      <td>{{obj}}</td>
-                      <td>{{obj.duration}}</td>
-                      <td>
-                        <ul>
-                          {% for p in  obj.predecessors.all %}
-                          <li>{{p}}  <a href="{% url 'projects:predecessor_delete' obj.id p.pk %}">Delete</a>  </li>
-                          {% endfor %}
-                        </ul>
-                      </td>
-                      <td>
-                        <a href="{%url 'projects:task_change' obj.id %}">Edit Task</a>
-                        <a href="{%url 'projects:add-predecessor' obj.id %}">Add predecessor</a>
-                      </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-
-
-
-              </table>
-            </div>
-          </div>
-
-
-
-
-        </div><!--tasks-->
-        <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">...</div>
-        <div class="tab-pane fade" id="contact-tab-pane" role="tabpanel" aria-labelledby="contact-tab" tabindex="0">...</div>
-        <div class="tab-pane fade" id="disabled-tab-pane" role="tabpanel" aria-labelledby="disabled-tab" tabindex="0">...</div>
+    
+        </div>
+    
+    
+    
       </div>
 
     </div>
 
-
-
   </div>
+
+
+
+
 
 
 
