@@ -1,9 +1,12 @@
 import json
 import datetime
 from django.utils import timezone
-import networkx as nx
+import matplotlib
+matplotlib.use('Agg')  # <- This line fixes the Tkinter / RuntimeError
 import matplotlib.pyplot as plt
+import networkx as nx
 import matplotlib.patches as mpatches
+
 data = [
     {
         'activity': 'a',
@@ -73,12 +76,14 @@ def detect_cycle(data):
             dfs(activity['activity'])
 
 
-def draw_activity_graph(data, critical_path):
-    """
-    Draws the activity dependency graph.
-    Critical path edges are highlighted in red.
-    Nodes show activity name and duration.
-    """
+
+def draw_activity_graph(data, critical_path, save_path=None):
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    import networkx as nx
+    import matplotlib.patches as mpatches
+
     G = nx.DiGraph()
     label_mapping = {}
     for activity in data:
@@ -107,9 +112,15 @@ def draw_activity_graph(data, critical_path):
     red_patch = mpatches.Patch(color='red', label='Critical Path')
     plt.legend(handles=[red_patch])
     plt.title("Project Activity Graph with Durations")
-    plt.show()
 
-def draw_gantt_chart(data):
+    if save_path:
+        plt.savefig(save_path, bbox_inches='tight')
+    else:
+        plt.show()
+
+    plt.close()
+
+def draw_gantt_chart(data,critical_path, save_path=None):
     """
     Draws a Gantt chart based on Early Start (ES) and Duration.
     Critical path activities are highlighted in red.
@@ -135,7 +146,11 @@ def draw_gantt_chart(data):
     plt.legend(handles=[red_patch, blue_patch])
     plt.grid(True, axis='x')
     plt.tight_layout()
-    plt.show()
+    if save_path:
+        plt.savefig(save_path)
+    else:
+        plt.show()
+    plt.close()
 
 
 def calculate_cpm(data, draw_graph=False, draw_gantt=False):
@@ -258,6 +273,7 @@ def calculate_cpm(data, draw_graph=False, draw_gantt=False):
 
 #     return data
 
+#
 #calculate_cpm(data, draw_graph=True, draw_gantt=True)
 #critical_path = calculate_cpm(data, draw_graph=False)
 

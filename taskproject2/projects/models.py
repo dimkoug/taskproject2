@@ -138,6 +138,8 @@ class Predecessor(Timestamped):
 class CPMReport(Timestamped):
     name = models.CharField(max_length=255)
     project = models.ForeignKey("projects.Project", on_delete=models.CASCADE)
+    cpm_graph = models.ImageField(upload_to='cpm_reports/graphs/', null=True, blank=True)
+    gantt_chart = models.ImageField(upload_to='cpm_reports/gantts/', null=True, blank=True)
 
 
     class Meta:

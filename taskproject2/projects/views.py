@@ -1,5 +1,7 @@
 import datetime
 import plotly.express as px
+from django.core.files import File
+import os
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.template.loader import render_to_string
@@ -9,6 +11,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+import tempfile
+from django.conf import settings
+
 
 
 from core.views import *
@@ -18,7 +23,7 @@ from core.mixins import PaginationMixin, ModelMixin, SuccessUrlMixin,FormMixin,Q
 
 from projects.models import *
 from projects.forms import *
-from projects.calculate_critical_path import calculate_cpm
+from projects.calculate_critical_path import *
 
 
 class CategoryListView(BaseListView,QueryMixin):
@@ -314,6 +319,18 @@ class CPMReportListView(BaseListView):
                     for pr in task.successor_tasks.all():
                         activity['predecessors'].append(pr.from_task.name)
                     data.append(activity)
+                
+                temp_dir = os.path.join(settings.MEDIA_ROOT, 'tmp')
+                os.makedirs(temp_dir, exist_ok=True)
+                
+                graph_path = os.path.join(temp_dir, f"cpm_graph_{cpmreport.id}.png")
+                gantt_path = os.path.join(temp_dir, f"gantt_chart_{cpmreport.id}.png")
+                
+                
+
+                
+                
+                
                 critical_path = calculate_cpm(data)
                 for item in critical_path:
                     print(item)
@@ -326,6 +343,28 @@ class CPMReportListView(BaseListView):
                         ls = item['ls'],
                         lf = item['lf']
                     )
+                critical_path_data = []
+                
+                for item in CPMReportData.objects.filter(cpmreport_id=cpmreport.id,slack=0):
+                    critical_path_data.append(item)
+                
+                critical_path = [activity['activity'] for activity in data if activity['slack'] == 0]
+                print(critical_path)
+                
+                draw_activity_graph(data,critical_path, save_path=graph_path)
+                draw_gantt_chart(data, critical_path,save_path=gantt_path)
+                               
+
+
+                with open(graph_path, 'rb') as graph_file:
+                    cpmreport.cpm_graph.save(os.path.basename(graph_path), File(graph_file))
+
+                with open(gantt_path, 'rb') as gantt_file:
+                    cpmreport.gantt_chart.save(os.path.basename(gantt_path), File(gantt_file))
+
+                cpmreport.save()
+            
+            
             except Project.DoesNotExist:
                 pass
         context = self.get_context_data()
