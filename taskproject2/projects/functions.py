@@ -29,7 +29,7 @@ def get_sb_categories_data(request):
 def get_sb_projects_data(request):
     if request.user.is_anonymous:
         return JsonResponse({"results":[]},safe=False)
-    queryset = Project.objects.prefetch_related('company__profiles').filter(company__profiles=request.user.profile)
+    queryset = Project.objects.prefetch_related('category__company__profiles').filter(category__company__profiles=request.user.profile)
     q_objects = Q()
     d_objects = []
     q = request.GET.get('search')
