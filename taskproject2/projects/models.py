@@ -1,4 +1,6 @@
+import datetime
 from django.db import models
+
 from django.db.models import Min, Max
 # Create your models here.
 from django.core.exceptions import ValidationError
@@ -18,7 +20,6 @@ class Category(Timestamped):
 
 
 class Project(Timestamped):
-    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE)
     category = models.ForeignKey("projects.Category", on_delete=models.CASCADE)
     parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     budget = models.DecimalField(max_digits=18, decimal_places=2,blank=True, null=True)
@@ -55,18 +56,19 @@ class Task(Timestamped):
     
     @property
     def duration(self):
-        return (self.end_date - self.start_date).days
+        delta = self.end_date - self.start_date
+        return delta.days
 
     @property
     def early_start(self):
         # Compute ES based on predecessors
         if self.predecessors.exists():
             return max(predecessor.to_task.early_finish for predecessor in self.predecessor_tasks.all())
-        return 0
+        return self.start_date
 
     @property
     def early_finish(self):
-        return self.early_start + self.duration
+        return self.early_start + datetime.timedelta(days=self.duration)
 
     @property
     def late_finish(self):
@@ -77,7 +79,8 @@ class Task(Timestamped):
 
     @property
     def late_start(self):
-        return self.late_finish - self.duration
+        delta = self.late_finish - datetime.timedelta(days=self.duration)
+        return delta
 
     @property
     def slack(self):
@@ -147,8 +150,8 @@ class CPMReport(Timestamped):
 class CPMReportData(Timestamped):
     cpmreport = models.ForeignKey("projects.CPMReport", on_delete=models.CASCADE)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    es = models.IntegerField(default=0)
-    ef = models.IntegerField(default=0)
-    ls = models.IntegerField(default=0)
-    lf = models.IntegerField(default=0)
+    es = models.DateTimeField()
+    ef = models.DateTimeField()
+    ls = models.DateTimeField()
+    lf = models.DateTimeField()
     slack = models.IntegerField(default=0)

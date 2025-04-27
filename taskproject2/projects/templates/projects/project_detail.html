@@ -39,6 +39,7 @@
                 <thead>
                   <tr>
                     <th>Name</th>
+                    <th>Duration</th>
                     <th>Predecessors</th>
                     <th></th>
                   </tr>
@@ -47,15 +48,17 @@
                   {% for obj in object.tasks.all %}
                     <tr>
                       <td>{{obj}}</td>
+                      <td>{{obj.duration}}</td>
                       <td>
                         <ul>
                           {% for p in  obj.predecessors.all %}
-                            <li>{{p}}</li>
+                          <li>{{p}}  <a href="{% url 'projects:predecessor_delete' obj.id p.pk %}">Delete</a>  </li>
                           {% endfor %}
                         </ul>
                       </td>
                       <td>
-                        <a href="">Add predecessor</a>
+                        <a href="{%url 'projects:task_change' obj.id %}">Edit Task</a>
+                        <a href="{%url 'projects:add-predecessor' obj.id %}">Add predecessor</a>
                       </td>
                     </tr>
                     {% endfor %}

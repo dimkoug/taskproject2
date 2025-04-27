@@ -1,49 +1,51 @@
 import json
+import datetime
+from django.utils import timezone
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-# data = [
-#     {
-#         'activity': 'a',
-#         "duration": 3,
-#         "predecessors": []
-#     },
-#     {
-#         'activity': 'b',
-#         "duration": 4,
-#         "predecessors": ['a']
-#     },
-#     {
-#         'activity': 'c',
-#         "duration": 2,
-#         "predecessors": ['a']
-#     },
-#     {
-#         'activity': 'd',
-#         "duration": 5,
-#         "predecessors": ['b']
-#     },
-#     {
-#         'activity': 'e',
-#         "duration": 1,
-#         "predecessors": ['c']
-#     },
-#     {
-#         'activity': 'f',
-#         "duration": 2,
-#         "predecessors": ['c']
-#     },
-#     {
-#         'activity': 'g',
-#         "duration": 4,
-#         "predecessors": ['d', 'e']
-#     },
-#     {
-#         'activity': 'h',
-#         "duration": 3,
-#         "predecessors": ['f', 'g']
-#     }
-# ]
+data = [
+    {
+        'activity': 'a',
+        "duration": 3,
+        "predecessors": []
+    },
+    {
+        'activity': 'b',
+        "duration": 4,
+        "predecessors": ['a']
+    },
+    {
+        'activity': 'c',
+        "duration": 2,
+        "predecessors": ['a']
+    },
+    {
+        'activity': 'd',
+        "duration": 5,
+        "predecessors": ['b']
+    },
+    {
+        'activity': 'e',
+        "duration": 1,
+        "predecessors": ['c']
+    },
+    {
+        'activity': 'f',
+        "duration": 2,
+        "predecessors": ['c']
+    },
+    {
+        'activity': 'g',
+        "duration": 4,
+        "predecessors": ['d', 'e']
+    },
+    {
+        'activity': 'h',
+        "duration": 3,
+        "predecessors": ['f', 'g']
+    }
+]
 
 
 def detect_cycle(data):
@@ -137,83 +139,128 @@ def draw_gantt_chart(data):
 
 
 def calculate_cpm(data, draw_graph=False, draw_gantt=False):
-    """
-    Calculates the Critical Path Method (CPM) for a project.
-
-    Parameters:
-    ----------
-    data : list of dict
-        A list where each element is a dictionary with the following keys:
-            - 'activity' (str): The unique name of the activity.
-            - 'predecessors' (list of str): A list of activity names that must be completed before this activity starts.
-            - 'duration' (int or float): The time required to complete the activity.
-
-    draw_graph : bool, optional (default=False)
-        If True, draws a visualization of the activity dependency graph.
-
-    Returns:
-    -------
-    list of dict
-        The input list with additional keys for each activity:
-            - 'es' (Early Start)
-            - 'ef' (Early Finish)
-            - 'ls' (Late Start)
-            - 'lf' (Late Finish)
-            - 'slack' (Float time)
-    
-    Raises:
-    ------
-    ValueError
-        If a circular dependency (cycle) is detected in the input data.
-    """
-
-    # Step 0: Detect cycles before proceeding
-    detect_cycle(data)
-    
-
-    
-    # Build quick lookup for activities
     activity_lookup = {activity['activity']: activity for activity in data}
     
-    # Step 1: Forward Pass
+    project_start = data[0]['es']
+
+    # Forward Pass
     for activity in data:
-        es = 0
-        for pred in activity['predecessors']:
-            pred_ef = activity_lookup[pred]['ef']
-            es = max(es, pred_ef)
+        if not activity['predecessors']:
+            es = project_start
+        else:
+            pred_efs = [activity_lookup[pred]['ef'] for pred in activity['predecessors']]
+            es = max(pred_efs)
+        
         activity['es'] = es
-        activity['ef'] = es + activity['duration']
-    
-    # Step 2: Build successors
+        activity['ef'] = es + datetime.timedelta(days=activity['duration'])
+
+    # Build successors
     successors = {activity['activity']: [] for activity in data}
     for activity in data:
         for pred in activity['predecessors']:
             successors[pred].append(activity['activity'])
-    
-    # Step 3: Backward Pass
+
+    # Backward Pass
+    project_finish = max(activity['ef'] for activity in data)
+
     for activity in reversed(data):
         if not successors[activity['activity']]:
-            activity['lf'] = activity['ef']
+            lf = project_finish
         else:
-            successor_ls = [activity_lookup[succ]['ls'] for succ in successors[activity['activity']]]
-            activity['lf'] = min(successor_ls)
-        activity['ls'] = activity['lf'] - activity['duration']
-        activity['slack'] = activity['lf'] - activity['ef']
-    
-    # Step 4: Critical Path
+            succ_ls = [activity_lookup[succ]['ls'] for succ in successors[activity['activity']]]
+            lf = min(succ_ls)
+
+        activity['lf'] = lf
+        activity['ls'] = lf - datetime.timedelta(days=activity['duration'])
+
+        slack = (activity['ls'] - activity['es']).days
+        activity['slack'] = max(slack, 0)
+
+    # Critical Path
     critical_path = [activity['activity'] for activity in data if activity['slack'] == 0]
     print(f"Critical Path: {critical_path}")
-    
-    if draw_graph:
-        draw_activity_graph(data, critical_path)
-    if draw_gantt:
-        draw_gantt_chart(data)
-    
+
     return data
 
-# calculate_cpm(data, draw_graph=True, draw_gantt=True)
-# critical_path = calculate_cpm(data, draw_graph=False)
 
-# print(json.dumps(critical_path, indent=4, sort_keys=True))
+# def calculate_cpm(data, draw_graph=False, draw_gantt=False):
+#     """
+#     Calculates the Critical Path Method (CPM) for a project using datetime.
+
+#     Parameters:
+#     ----------
+#     data : list of dict
+#         Each dict must have:
+#             - 'activity' (str): Unique activity name.
+#             - 'predecessors' (list of str): Names of predecessor activities.
+#             - 'duration' (int or float): Duration in days.
+
+#     Returns:
+#     -------
+#     list of dict
+#         Each activity enriched with:
+#             - 'es' (Early Start)
+#             - 'ef' (Early Finish)
+#             - 'ls' (Late Start)
+#             - 'lf' (Late Finish)
+#             - 'slack' (days)
+#     """
+
+#     # Assume no cycle check for now unless you implement detect_cycle()
+
+#     # Quick lookup
+#     activity_lookup = {activity['activity']: activity for activity in data}
+    
+#     # Step 1: Forward Pass
+#     project_start = datetime.datetime.now()
+
+#     for activity in data:
+#         if not activity['predecessors']:
+#             es = project_start
+#         else:
+#             pred_efs = [activity_lookup[pred]['ef'] for pred in activity['predecessors']]
+#             es = max(pred_efs)
+        
+#         activity['es'] = es
+#         activity['ef'] = es + datetime.timedelta(days=activity['duration'])
+
+#     # Step 2: Build successors
+#     successors = {activity['activity']: [] for activity in data}
+#     for activity in data:
+#         for pred in activity['predecessors']:
+#             successors[pred].append(activity['activity'])
+
+#     # Step 3: Backward Pass
+#     # Find the project finish date
+#     project_finish = max(activity['ef'].replace(tzinfo=None) for activity in data)
+
+#     for activity in reversed(data):
+#         if not successors[activity['activity']]:
+#             lf = project_finish
+#         else:
+#             succ_ls = [activity_lookup[succ]['ls'] for succ in successors[activity['activity']]]
+#             lf = min(succ_ls)
+
+#         activity['lf'] = lf
+#         activity['ls'] = lf - datetime.timedelta(days=activity['duration'])
+
+#         slack = (activity['ls'].replace(tzinfo=None) - activity['es'].replace(tzinfo=None)).days
+#         activity['slack'] = max(slack, 0)
+
+#     # Step 4: Critical Path
+#     critical_path = [activity['activity'] for activity in data if activity['slack'] == 0]
+#     print(f"Critical Path: {critical_path}")
+
+#     if draw_graph:
+#         draw_activity_graph(data, critical_path)
+#     if draw_gantt:
+#         draw_gantt_chart(data)
+
+#     return data
+
+#calculate_cpm(data, draw_graph=True, draw_gantt=True)
+#critical_path = calculate_cpm(data, draw_graph=False)
+
+#print(json.dumps(critical_path, indent=4, sort_keys=True))
 
 

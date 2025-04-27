@@ -20,7 +20,7 @@ class CategoryForm(BootstrapForm, forms.ModelForm):
 class ProjectForm(BootstrapForm, forms.ModelForm):
     class Meta:
         model = Project
-        fields = ('category','parent','company', 'name','budget')
+        fields = ('category','parent','name','budget')
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
@@ -45,8 +45,54 @@ class PredecessorForm(BootstrapForm, forms.ModelForm):
         fields = ('from_task', 'to_task','start_type')
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request")
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
+
+class PredecessorForm(BootstrapForm, forms.ModelForm):
+    class Meta:
+        model = Predecessor
+        fields = ('from_task', 'to_task', 'start_type')
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     from_task = cleaned_data.get('from_task')
+    #     to_task = cleaned_data.get('to_task')
+    #     start_type = cleaned_data.get('start_type')
+        
+    #     if not from_task or not to_task or not start_type:
+    #         return cleaned_data  # Skip validation if required fields are missing
+
+    #     from_start_date = from_task.start_date
+    #     from_end_date = from_task.end_date
+    #     to_start_date = to_task.start_date
+    #     to_end_date = to_task.end_date
+
+    #     if start_type == Predecessor.FS:
+    #         if from_end_date.date() > to_start_date.date():
+    #             self.add_error('to_task', f"FS: Parent end date {from_end_date} must be before child start date {to_start_date}.")
+    #     elif start_type == Predecessor.SS:
+    #         if to_start_date.date() != from_start_date.date():
+    #             self.add_error('to_task', f"SS: Start dates must match ({from_start_date} vs {to_start_date}).")
+    #     elif start_type == Predecessor.FF:
+    #         if to_end_date.date() > from_end_date.date():
+    #             self.add_error('to_task', f"FF: Child end date {to_end_date} must not be after parent end date {from_end_date}.")
+    #     elif start_type == Predecessor.SF:
+    #         if to_start_date.date() < from_end_date.date():
+    #             self.add_error('to_task', f"SF: Child start date {to_start_date} must not be before parent end date {from_end_date}.")
+
+    #     return cleaned_data
+
+
+
+
+
+
+
+
 
 
 

@@ -16,8 +16,8 @@ from core.views import *
 from core.functions import is_ajax
 from core.mixins import PaginationMixin, ModelMixin, SuccessUrlMixin,FormMixin,QueryMixin, AjaxDeleteMixin
 
-from projects.models import Category, Project, Task, Predecessor, CPMReport,CPMReportData
-from projects.forms import CategoryForm, ProjectForm, TaskForm, PredecessorFormSet,GanttFilterForm
+from projects.models import *
+from projects.forms import *
 from projects.calculate_critical_path import calculate_cpm
 
 
@@ -77,11 +77,11 @@ class ProjectListView(BaseListView):
 
     model = Project
     paginate_by = 100  # if pagination is desired
-    queryset = Project.objects.prefetch_related('company__profiles').select_related('parent')
+    queryset = Project.objects.prefetch_related('category__company__profiles').select_related('parent')
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.filter(company__profiles=self.request.user.profile.id)
+        queryset = queryset.filter(category__company__profiles=self.request.user.profile.id)
         category = self.request.GET.get('category')
         parent = self.request.GET.get('parent')
         if category:
@@ -99,12 +99,12 @@ class ProjectListView(BaseListView):
 
 class ProjectDetailView(BaseDetailView):
     model = Project
-    queryset = Project.objects.prefetch_related('company__profiles')
+    queryset = Project.objects.prefetch_related('category__company__profiles')
 
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.prefetch_related('company__profiles').filter(company__profiles=self.request.user.profile.id)
+        queryset = queryset.prefetch_related('category__company__profiles').filter(category__company__profiles=self.request.user.profile.id)
         return queryset
 
 
@@ -284,7 +284,7 @@ class TaskDeleteView(BaseDeleteView):
 class CPMReportListView(BaseListView):
     model = CPMReport
     paginate_by = 10  # if pagination is desired
-    queryset = CPMReport.objects.prefetch_related('project__company__profiles')
+    queryset = CPMReport.objects.prefetch_related('project__category__company__profiles')
 
     def dispatch(self, *args, **kwargs):
         self.ajax_partial = '{}/partials/{}_list_partial.html'.format(self.model._meta.app_label,self.model.__name__.lower())
@@ -295,9 +295,9 @@ class CPMReportListView(BaseListView):
         project_id = request.GET.get('project')
         if project_id:
             try:
-                project = Project.objects.prefetch_related('company__profiles').get(company__profiles=self.request.user.profile.pk,id=project_id)
+                project = Project.objects.prefetch_related('category__company__profiles').get(category__company__profiles=self.request.user.profile.pk,id=project_id)
                 title = 'Cpm report'
-                tasks = Task.objects.prefetch_related('project__company__profiles','predecessors').filter(project_id=project.pk)
+                tasks = Task.objects.prefetch_related('project__category__company__profiles','successor_tasks').filter(project__category__company__profiles=self.request.user.profile.pk,project_id=project.pk)
                 cpmreport = CPMReport.objects.create(
                     name=title,
                     project=project
@@ -306,12 +306,13 @@ class CPMReportListView(BaseListView):
                 for task in tasks:
                     activity = {}
                     activity['activity'] = task.name
-                    activity['start_date'] = task.start_date
-                    activity['end_date'] = task.end_date
-                    activity['duration'] = abs((task.end_date - task.start_date).days)
+                    activity['early_start'] = activity['es'] = task.early_start
+                    activity['late_start'] = activity['ls'] = task.late_start
+                    activity['early_finish'] = activity['ef'] = task.early_finish
+                    activity['duration'] = task.duration
                     activity['predecessors'] = []
-                    for pr in task.predecessors.all():
-                        activity['predecessors'].append(pr.name)
+                    for pr in task.successor_tasks.all():
+                        activity['predecessors'].append(pr.from_task.name)
                     data.append(activity)
                 critical_path = calculate_cpm(data)
                 for item in critical_path:
@@ -337,7 +338,7 @@ class CPMReportListView(BaseListView):
     def get_queryset(self):
         queryset = super().get_queryset()
         queryset = queryset.filter(
-                project__company__profiles=self.request.user.profile.pk)
+                project__category__company__profiles=self.request.user.profile.pk)
         return queryset
 
     def get_context_data(self, *args, **kwargs):
@@ -349,12 +350,12 @@ class CPMReportListView(BaseListView):
 
 class CPMReportDetailView(BaseDetailView):
     model = CPMReport
-    queryset = CPMReport.objects.prefetch_related('project__company__profiles','cpmreportdata_set__task__predecessors')
+    queryset = CPMReport.objects.prefetch_related('project__category__company__profiles','cpmreportdata_set__task__predecessors')
 
     def get_queryset(self):
         queryset = super().get_queryset()
         queryset = queryset.filter(
-                project__company__profiles=self.request.user.profile.pk)
+                project__category__company__profiles=self.request.user.profile.pk)
         return queryset
     
 
@@ -405,3 +406,38 @@ def gantt_chart_view(request, project_id):
         'form': form,
         'gantt_chart': gantt_chart_html,
     })
+    
+    
+    
+def add_predecessor(request, task_id):
+    task = Task.objects.select_related('project__category__company')\
+        .prefetch_related('project__category__company__profiles', 'predecessors')\
+        .get(id=task_id, project__category__company__profiles=request.user.profile)
+
+    if request.method == 'POST':
+        form = PredecessorForm(request=request, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect(reverse('projects:project_view', kwargs={"pk": task.project_id}))
+        else:
+            print(form.errors)
+            for field in form.errors:
+                if not '__all__' in field:
+                    try:
+                        form.fields[field].widget.attrs['class'] += ' is-invalid'
+                    except KeyError:
+                        form.fields[field].widget.attrs['class'] = 'is-invalid'
+
+            for error in form.non_field_errors():
+                print(error)
+    else:
+        form = PredecessorForm(request=request, initial={"to_task": task})
+
+    return render(request, 'projects/add_predecessor.html', {'form': form})
+
+
+
+def delete_predecessor(request,task,id):
+    task = Task.objects.prefetch_related('predecessors').get(id=task)
+    task.predecessors.remove(id)
+    return redirect(reverse_lazy('projects:project_list'))

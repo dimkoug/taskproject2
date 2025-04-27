@@ -19,15 +19,16 @@
               {% for obj in object_list %}
               <tr>
                 <td>{{obj}}</td>
-                <td>{{obj.project}}</td>
+                <td><a href="{% url 'projects:project_view' obj.project_id %}">{{obj.project}}</a></td>
                 <td>{{obj.start_date|date:"d/m/Y"}}</td>
                 <td>{{obj.end_date|date:"d/m/Y"}}</td>
                 <td>{{obj.duration}}</td>
                 <td>
                   <ul>
                     {% for p in obj.predecessors.all %}
-                      <li>{{p}}</li>
+                      <li>{{p}}  <a href="{% url 'projects:predecessor_delete' obj.id p.id %}">Delete</a>  </li>
                     {% endfor %}
+                    <a href="{%url 'projects:add-predecessor' obj.id %}">Add predecessor</a>
                   </ul>
 
                 </td>
