@@ -3,9 +3,9 @@
 
 {% block content %}
 
-{% include 'partials/title_partial.html' %}
+{% include 'partials/_title.html' %}
 
-{% include 'partials/create_button.html' %}
+{% include 'partials/_create_button.html' %}
 
 <div class="row py-2">
   <div class="col">
@@ -37,7 +37,7 @@
   </div>
 </div>
 
-{% include 'partials/spinner_partial.html' %}
+{% include 'partials/_spinner.html' %}
 
 
 
@@ -54,7 +54,7 @@
 {% endblock content %}
 
 
-{% block scripts %}
+{% block javascripts %}
 <script>
   'use strict';
   (function(w,d,$){
@@ -76,4 +76,4 @@
     }) /* document ready */
   })(window,document,jQuery)
 </script>
-{% endblock scripts %}
+{% endblock javascripts %}

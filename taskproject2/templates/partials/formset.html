@@ -52,23 +52,33 @@
               for(item in $allLinks){
                 item.select2('destroy');
               }
-              $("select[name*='{{ formset.formset.prefix }}']" ).select2({
-                ajax: {
-                  url: '{{formset.sb_url}}',
-                  data: function (params) {
-                    var query = {
-                      search: params.term,
-                      type: 'public'
+              {% for formset in formsets %}
+                {% for item in formset.sb_urls %}
+                console.info('{{ formset.formset.prefix }}-{{forloop.parentloop.counter}}-{{item.name}}')
+                let name="{{item.name}}"  
+                $("select[name*='"+name+"']").select2({
+                  ajax: {
+                    url: '{{item.url}}',
+                    data: function (params) {
+                      var query = {
+                        search: params.term,
+                        type: 'public'
+                      }
+                      // Query parameters will be ?search=[term]&type=public
+                      return query;
                     }
-                    // Query parameters will be ?search=[term]&type=public
-                    return query;
                   }
-                }
-              });
+                });
+                {% endfor %}
+                {%endfor%}
             })
-            $("select[name*='{{ formset.formset.prefix }}']" ).select2({
+            {% for formset in formsets %}
+            {% for item in formset.sb_urls %}
+            console.info('{{ formset.formset.prefix }}-{{forloop.parentloop.counter}}-{{item.name}}')
+            let name="{{item.name}}"  
+            $("select[name*='"+name+"']").select2({
               ajax: {
-                url: '{{formset.sb_url}}',
+                url: '{{item.url}}',
                 data: function (params) {
                   var query = {
                     search: params.term,
@@ -79,6 +89,8 @@
                 }
               }
             });
+            {% endfor %}
+            {%endfor%}
           })
       </script>
   </div>

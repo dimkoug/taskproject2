@@ -30,7 +30,7 @@
         <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">Tasks
           <div class="d-flex flex-row">
             <div class="col">
-              <a href="">Add task</a>
+              <a href="{% url 'projects:task_add' %}?project={{object.pk}}">Add task</a>
             </div>
           </div>
           <div class="d-flex flex-row">

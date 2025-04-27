@@ -51,6 +51,15 @@ class PredecessorForm(BootstrapForm, forms.ModelForm):
 
 
 class PredecessorBootstrapFormSet(BootstrapFormSet):
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)  # <--- capture request
+        super().__init__(*args, **kwargs)
+
+    def get_form_kwargs(self, index):
+        kwargs = super().get_form_kwargs(index)
+        kwargs['request'] = self.request  # pass request to each form
+        return kwargs
+    
     def clean(self):
         print("clean")
         start_date = self.instance.start_date

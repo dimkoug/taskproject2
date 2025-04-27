@@ -142,12 +142,12 @@ class ProjectDeleteView(BaseDeleteView):
 class TaskListView(BaseListView):
     model = Task
     paginate_by = 100  # if pagination is desired
-    queryset = Task.objects.select_related('project__category__profile').prefetch_related('predecessors')
+    queryset = Task.objects.select_related('project__category__company').prefetch_related('project__category__company__profiles','predecessors')
 
     def get_queryset(self):
         queryset = super().get_queryset()
         queryset = queryset.filter(
-                project__category__profile_id=self.request.user.profile.pk)
+                project__category__company__profiles=self.request.user.profile.pk)
         return queryset
 
     def get_context_data(self, *args, **kwargs):
@@ -158,18 +158,29 @@ class TaskListView(BaseListView):
 
 class TaskDetailView(BaseDetailView):
     model = Task
-    queryset = Task.objects.select_related('project__category__profile')
+    queryset = Task.objects.select_related('project__category__company').prefetch_related('project__category__company__profiles','predecessors')
+
 
     def get_queryset(self):
         queryset = super().get_queryset()
         queryset = queryset.filter(
-                project__category__profile_id=self.request.user.profile.pk)
+                project__category__company__profiles=self.request.user.profile.pk)
         return queryset
 
 
 class TaskCreateView(BaseCreateView):
     model = Task
     form_class = TaskForm
+    
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        initial.update({
+            'project':self.request.GET.get('project')
+        })
+        return initial
+    
+    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -180,7 +191,7 @@ class TaskCreateView(BaseCreateView):
                     self.request.POST or None,
                     queryset=Predecessor.objects.select_related(
                         'from_task', 'to_task')),
-                "sb_url": reverse("projects:get_tasks_for_sb")
+                "sb_urls": [{"name":"to_task","url":reverse("projects:get_tasks_for_sb")}]
             },
         ]
         return context
@@ -210,12 +221,13 @@ class TaskCreateView(BaseCreateView):
 class TaskUpdateView(BaseUpdateView):
     model = Task
     form_class = TaskForm
-    queryset = Task.objects.select_related('project__category__profile')
+    queryset = Task.objects.select_related('project__category__company').prefetch_related('project__category__company__profiles','predecessors')
+
 
     def get_queryset(self):
         queryset = super().get_queryset()
         queryset = queryset.filter(
-                project__category__profile_id=self.request.user.profile.pk)
+                project__category__company__profiles=self.request.user.profile.pk)
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -228,7 +240,7 @@ class TaskUpdateView(BaseUpdateView):
                     instance=self.get_object(),
                     queryset=Predecessor.objects.select_related(
                         'from_task', 'to_task')),
-                "sb_url": reverse("projects:get_tasks_for_sb")
+                "sb_urls": [{"name":"to_task","url":reverse("projects:get_tasks_for_sb")}]
             },
         ]
         return context

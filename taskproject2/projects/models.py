@@ -34,7 +34,6 @@ class Project(Timestamped):
 
 
 class Task(Timestamped):
-    company = models.ForeignKey("companies.Company", on_delete=models.CASCADE)
     project = models.ForeignKey("projects.Project", on_delete=models.CASCADE)
     predecessors = models.ManyToManyField("self", through="Predecessor", through_fields=("from_task", "to_task"),symmetrical=False)
     name = models.CharField(max_length=100)

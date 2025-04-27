@@ -56,8 +56,8 @@ def get_tasks_for_sb(request):
         return JsonResponse(results, safe=False)
     search = request.GET.get('search')
     if search and search != '':
-        data = Task.objects.prefetch_related('company__profiles').filter(
-            Q(name__icontains=search),company__profiles=request.user.profile.pk
+        data = Task.objects.prefetch_related('project__company__profiles').filter(
+            Q(name__icontains=search),project__company__profiles=request.user.profile.pk
         ).values('id', 'name')
         for d in data:
             results.append({'id':d['id'], "text": d['name']})

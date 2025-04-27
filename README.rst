@@ -20,7 +20,7 @@ Quick start
 
 5. Create settings_local.py with settings from settings_local_sample.py
 
-6. Run `python manage.py makemigrations users profiles companies invitations projects`
+6. Run `python manage.py makemigrations users profiles companies invitations projects auth sites`
 
 7. Run `python manage.py migrate`
 
