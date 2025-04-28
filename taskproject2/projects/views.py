@@ -500,27 +500,7 @@ def download_full_project_report_pdf(request, project_id):
     body = 'Please find the attached PDF.'
     from_email = 'your_email@example.com'
     to_email = [request.user.email]
-
-    # Load your PDF file
-    file = report.report
-    file.open('rb')  # ensure it's open
-    pdf_data = file.read()
-    file.close()
-
-    # Create the email
-    email = EmailMessage(
-        subject,
-        body,
-        from_email,
-        to_email,
-    )
-
-    # Attach the PDF file
-    email.attach(filename, pdf_data, 'application/pdf')
-
-    # Send the email
-    email.send()
-
+    send_report_email(request,report.id,[request.user.email])
     # Serve the PDF as download
     response = HttpResponse(pdf_bytes, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{filename}_full_report.pdf"'

@@ -1,6 +1,7 @@
 import os
 from django.conf import settings
 from django.core.files import File
+from django.core.mail import EmailMessage
 from projects.models import *
 from projects.calculate_critical_path import *
 
@@ -75,3 +76,36 @@ def generate_cpm_report(request,project_id):
 
     cpmreport.save()
     return data
+
+
+
+def send_report_email(request,report_id,emails):
+    report = Report.objects.get(id=report_id)
+    subject = 'Here is your PDF'
+    body = 'Please find the attached PDF.'
+    from_email = 'your_email@example.com'
+    to_email = [request.user.email]
+
+    # Load your PDF file
+    file = report.report
+    file.open('rb')  # ensure it's open
+    pdf_data = file.read()
+    file.close()
+    filename = report.__str__()
+    for email in emails:
+
+        # Create the email
+        email_msg = EmailMessage(
+            subject,
+            body,
+            from_email,
+            email,
+        )
+
+        # Attach the PDF file
+        email_msg.attach(filename, pdf_data, 'application/pdf')
+
+        # Send the email
+        email_msg.send()
+
+
