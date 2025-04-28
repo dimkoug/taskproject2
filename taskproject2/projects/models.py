@@ -36,7 +36,7 @@ class Project(Timestamped):
 
 class Task(Timestamped):
     project = models.ForeignKey("projects.Project", on_delete=models.CASCADE)
-    predecessors = models.ManyToManyField("self", through="Predecessor", through_fields=("to_task", "from_task"),symmetrical=False)
+    predecessors = models.ManyToManyField("self", through="Predecessor", through_fields=("from_task", "to_task"),symmetrical=False)
     name = models.CharField(max_length=100)
     budget = models.DecimalField(max_digits=18, decimal_places=2,blank=True, null=True)
     start_date = models.DateTimeField()
