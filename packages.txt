@@ -25,6 +25,7 @@ beautify
 billiard
 bleach
 Bottleneck
+Brotli
 bs4
 cached-property
 celery
@@ -166,6 +167,7 @@ nbclient
 nbconvert
 nbformat
 nest-asyncio
+networkx
 nltk
 notebook
 notebook_shim
@@ -208,6 +210,7 @@ pycparser
 PyDispatcher
 pydocstyle
 pydotplus
+pydyf
 pyflakes
 Pygments
 pyHanko
@@ -226,6 +229,7 @@ pyOpenSSL
 pyparsing
 pypdf
 PyPDF2
+pyphen
 pypiwin32
 pypng
 PySocks
@@ -277,6 +281,7 @@ selenium
 Send2Trash
 sendgrid
 service-identity
+setuptools
 shortuuid
 simplejson
 six
@@ -297,6 +302,7 @@ terminado
 text-unidecode
 threadpoolctl
 tinycss2
+tinyhtml5
 tldextract
 tomli
 tomlkit
@@ -320,6 +326,7 @@ urllib3
 vine
 w3lib
 wcwidth
+weasyprint
 webcolors
 webdriver-manager
 webencodings
@@ -332,3 +339,4 @@ XlsxWriter
 xmltodict
 zipp
 zope.interface
+zopfli
