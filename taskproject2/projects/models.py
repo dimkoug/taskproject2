@@ -165,6 +165,7 @@ class Report(Timestamped):
     report = models.FileField(upload_to='reports/', null=True, blank=True)
 
     class Meta:
+        default_related_name = 'reports'
         ordering = ['-created'] 
 
     def __str__(self):

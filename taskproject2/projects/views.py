@@ -106,12 +106,12 @@ class ProjectListView(BaseListView):
 
 class ProjectDetailView(BaseDetailView):
     model = Project
-    queryset = Project.objects.prefetch_related('category__company__profiles')
+    queryset = Project.objects.prefetch_related('category__company__profiles', 'reports')
 
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.prefetch_related('category__company__profiles').filter(category__company__profiles=self.request.user.profile.id)
+        queryset = queryset.filter(category__company__profiles=self.request.user.profile.id)
         return queryset
 
 

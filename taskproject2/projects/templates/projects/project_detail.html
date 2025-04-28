@@ -19,7 +19,7 @@
               <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">Tasks</button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">Profile</button>
+              <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">Reports</button>
             </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact-tab-pane" type="button" role="tab" aria-controls="contact-tab-pane" aria-selected="false">Contact</button>
@@ -30,12 +30,13 @@
           </ul>
           <div class="tab-content" id="myTabContent">
             <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
-              <a href="{% url 'projects:project-generate-report' object.id %}">Generate Cpm report</a>
+     
               
               
               <div class="d-flex flex-row">
                 <div class="col py-2">
                   <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{% url 'projects:project-generate-report' object.id %}" class="btn btn-primary">Generate Cpm report</a>
                   <a href="{% url 'projects:task_add' %}?project={{object.pk}}" class="btn btn-primary">Add task</a>
                   </div>
                 </div>
@@ -81,7 +82,37 @@
     
     
             </div><!--tasks-->
-            <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">...</div>
+            <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
+              <div class="d-flex flex-row">
+                <div class="col">
+                  <table class="table table-bordered">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Report</th>
+                        <th>Created Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for obj in object.reports.all %}
+                        <tr>
+                          <td>{{obj}}</td>
+                          <td><a href="{{obj.report}}"><i class="bi bi-filetype-pdf" style="font-size:1.5rem;"></i></a></td>
+                          <td>
+                            {{obj.created|date:"Y/m/d"}}
+                          </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+    
+    
+    
+                  </table>
+                </div>
+
+
+
+            </div>
             <div class="tab-pane fade" id="contact-tab-pane" role="tabpanel" aria-labelledby="contact-tab" tabindex="0">...</div>
             <div class="tab-pane fade" id="disabled-tab-pane" role="tabpanel" aria-labelledby="disabled-tab" tabindex="0">...</div>
           </div>
