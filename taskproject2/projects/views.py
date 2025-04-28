@@ -3,6 +3,7 @@ import plotly.express as px
 from django.core.files import File
 import os
 from django.shortcuts import render
+from django.core.mail import EmailMessage
 from django.urls import reverse, reverse_lazy
 from django.template.loader import render_to_string
 from django.db.models import Prefetch
@@ -494,6 +495,31 @@ def download_full_project_report_pdf(request, project_id):
         report = Report.objects.create(project=project)
         report.report.save(filename, File(f))
         report.save()
+
+    subject = 'Here is your PDF'
+    body = 'Please find the attached PDF.'
+    from_email = 'your_email@example.com'
+    to_email = [request.user.email]
+
+    # Load your PDF file
+    file = report.report
+    file.open('rb')  # ensure it's open
+    pdf_data = file.read()
+    file.close()
+
+    # Create the email
+    email = EmailMessage(
+        subject,
+        body,
+        from_email,
+        to_email,
+    )
+
+    # Attach the PDF file
+    email.attach(filename, pdf_data, 'application/pdf')
+
+    # Send the email
+    email.send()
 
     # Serve the PDF as download
     response = HttpResponse(pdf_bytes, content_type='application/pdf')
