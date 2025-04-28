@@ -59,8 +59,8 @@
                           <td>{{obj.duration}}</td>
                           <td>
                             <ul>
-                              {% for p in  obj.predecessors.all %}
-                              <li>{{p}}  <a href="{% url 'projects:predecessor_delete' obj.id p.pk %}">Delete</a>  </li>
+                              {% for p in  obj.successor_tasks.all %}
+                              <li>{{p.from_task.name}}  <a href="{% url 'projects:predecessor_delete' obj.id p.pk %}">Delete</a>  </li>
                               {% endfor %}
                             </ul>
                           </td>

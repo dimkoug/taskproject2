@@ -106,7 +106,7 @@ class ProjectListView(BaseListView):
 
 class ProjectDetailView(BaseDetailView):
     model = Project
-    queryset = Project.objects.prefetch_related('category__company__profiles', 'reports')
+    queryset = Project.objects.prefetch_related('category__company__profiles', 'reports', 'tasks__successor_tasks__from_task')
 
 
     def get_queryset(self):
