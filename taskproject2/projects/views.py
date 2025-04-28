@@ -424,7 +424,6 @@ def delete_predecessor(request,task,id):
     return redirect(reverse_lazy('projects:project_list'))
 
 
-
 def download_full_project_report_pdf(request, project_id):
     project = Project.objects.prefetch_related('tasks').get(id=project_id)
     tasks = project.tasks.all()
@@ -432,20 +431,20 @@ def download_full_project_report_pdf(request, project_id):
     total_cost = sum(task.budget or 0 for task in tasks)
     start_date = tasks.order_by('start_date').first().start_date
     end_date = tasks.order_by('-end_date').first().end_date
+
     # Get latest CPM report
     cpm_report = CPMReport.objects.filter(project=project).order_by('-created').first()
     # If no CPMReport exists yet, generate it first
-    data = generate_cpm_report(request, project.id)
     if not cpm_report:
+        generate_cpm_report(request, project.id)
         cpm_report = CPMReport.objects.filter(project=project).order_by('-created').first()
-    # Make sure critical_path image exists
+
     critical_path_image_url = cpm_report.cpm_graph.url if cpm_report and cpm_report.cpm_graph else None
 
     # Generate Gantt images if missing
     gantt_folder = os.path.join(settings.MEDIA_ROOT, 'gantt_pages', f'project_{project.id}')
     if not os.path.exists(gantt_folder) or not os.listdir(gantt_folder):
         os.makedirs(gantt_folder, exist_ok=True)
-        # Prepare data for Gantt
         cpm_data = []
         for task in tasks:
             cpm_data.append({
@@ -458,17 +457,14 @@ def download_full_project_report_pdf(request, project_id):
                 "lf": task.late_finish,
                 "slack": task.slack,
             })
-
         draw_paginated_gantt_chart(cpm_data, save_folder=gantt_folder, page_size=100)
 
-    # Now collect gantt images
     gantt_images = []
     if os.path.exists(gantt_folder):
         for filename in sorted(os.listdir(gantt_folder)):
             if filename.endswith('.png'):
                 gantt_images.append(f'/media/gantt_pages/project_{project.id}/{filename}')
 
-    print(gantt_images)
     # Prepare context for HTML
     context = {
         'project': project,
@@ -483,9 +479,102 @@ def download_full_project_report_pdf(request, project_id):
 
     html_string = render_to_string('projects/full_project_report.html', context)
     html = HTML(string=html_string, base_url=request.build_absolute_uri('/'))
-    pdf_file = html.write_pdf()
+    pdf_bytes = html.write_pdf()
 
-    response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{project.name}_full_report.pdf"'
+    timestamp = datetime.datetime.now().strftime("%Y_%d_%m_%H_%M_%S")
+    filename = f"{project.name}_{timestamp}.pdf"
+
+    # Save PDF to temporary file first
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+        tmp_file.write(pdf_bytes)
+        tmp_file_path = tmp_file.name
+
+    # Now create and save the Report model
+    with open(tmp_file_path, 'rb') as f:
+        report = Report.objects.create(project=project)
+        report.report.save(filename, File(f))
+        report.save()
+
+    # Serve the PDF as download
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}_full_report.pdf"'
 
     return response
+
+
+# def download_full_project_report_pdf(request, project_id):
+#     project = Project.objects.prefetch_related('tasks').get(id=project_id)
+#     tasks = project.tasks.all()
+
+#     total_cost = sum(task.budget or 0 for task in tasks)
+#     start_date = tasks.order_by('start_date').first().start_date
+#     end_date = tasks.order_by('-end_date').first().end_date
+#     # Get latest CPM report
+#     cpm_report = CPMReport.objects.filter(project=project).order_by('-created').first()
+#     # If no CPMReport exists yet, generate it first
+#     data = generate_cpm_report(request, project.id)
+#     if not cpm_report:
+#         cpm_report = CPMReport.objects.filter(project=project).order_by('-created').first()
+#     # Make sure critical_path image exists
+#     critical_path_image_url = cpm_report.cpm_graph.url if cpm_report and cpm_report.cpm_graph else None
+
+#     # Generate Gantt images if missing
+#     gantt_folder = os.path.join(settings.MEDIA_ROOT, 'gantt_pages', f'project_{project.id}')
+#     if not os.path.exists(gantt_folder) or not os.listdir(gantt_folder):
+#         os.makedirs(gantt_folder, exist_ok=True)
+#         # Prepare data for Gantt
+#         cpm_data = []
+#         for task in tasks:
+#             cpm_data.append({
+#                 "activity": task.name,
+#                 "predecessors": [pred.from_task.name for pred in task.predecessor_tasks.all()],
+#                 "duration": (task.end_date - task.start_date).days,
+#                 "es": task.early_start,
+#                 "ef": task.early_finish,
+#                 "ls": task.late_start,
+#                 "lf": task.late_finish,
+#                 "slack": task.slack,
+#             })
+
+#         draw_paginated_gantt_chart(cpm_data, save_folder=gantt_folder, page_size=100)
+
+#     # Now collect gantt images
+#     gantt_images = []
+#     if os.path.exists(gantt_folder):
+#         for filename in sorted(os.listdir(gantt_folder)):
+#             if filename.endswith('.png'):
+#                 gantt_images.append(f'/media/gantt_pages/project_{project.id}/{filename}')
+
+#     print(gantt_images)
+#     # Prepare context for HTML
+#     context = {
+#         'project': project,
+#         'tasks': tasks,
+#         'total_cost': total_cost,
+#         'start_date': start_date,
+#         'end_date': end_date,
+#         'today': datetime.datetime.now().strftime('%Y-%m-%d'),
+#         'critical_path_image_url': critical_path_image_url,
+#         'gantt_images': gantt_images,
+#     }
+
+#     html_string = render_to_string('projects/full_project_report.html', context)
+#     html = HTML(string=html_string, base_url=request.build_absolute_uri('/'))
+#     pdf_file = html.write_pdf()
+#     report_folder = os.path.join(settings.MEDIA_ROOT, 'reports')
+#     os.makedirs(report_folder, exist_ok=True)
+    
+    
+#     report = Report.objects.create(project=project)
+#     temp_dir = os.path.join(settings.MEDIA_ROOT, 'tmp')
+#     os.makedirs(temp_dir, exist_ok=True)
+#     report_path = os.path.join(temp_dir, open(pdf_file))
+#     with open(report_path, 'rb') as report_file:
+#         report.report.save(os.path.basename(report_path), File(report_file))
+
+
+#     report.save()
+#     response = HttpResponse(pdf_file, content_type='application/pdf')
+#     response['Content-Disposition'] = f'attachment; filename="{project.name}_full_report.pdf"'
+
+#     return response

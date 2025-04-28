@@ -157,3 +157,16 @@ class CPMReportData(Timestamped):
     ls = models.DateTimeField()
     lf = models.DateTimeField()
     slack = models.IntegerField(default=0)
+
+
+
+class Report(Timestamped):
+    project = models.ForeignKey("projects.Project", on_delete=models.CASCADE)
+    report = models.FileField(upload_to='reports/', null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created'] 
+
+    def __str__(self):
+        return  f"Report for {self.project.name} generated {self.created}"
+
