@@ -306,9 +306,9 @@ class CPMReportListView(BaseListView):
 
     def get(self, request, *args, **kwargs):
         self.object_list = self.get_queryset()
-        project_id = request.GET.get('project')
-        if project_id:
-            generate_cpm_report(self.request,project_id)
+        # project_id = request.GET.get('project')
+        # if project_id:
+        #     generate_cpm_report(self.request,project_id)
 
         context = self.get_context_data()
         if is_ajax(request):
@@ -436,9 +436,9 @@ def download_full_project_report_pdf(request, project_id):
     # Get latest CPM report
     cpm_report = CPMReport.objects.filter(project=project).order_by('-created').first()
     # If no CPMReport exists yet, generate it first
-    if not cpm_report:
-        generate_cpm_report(request, project.id)
-        cpm_report = CPMReport.objects.filter(project=project).order_by('-created').first()
+    # if not cpm_report:
+    #     generate_cpm_report(request, project.id)
+    #     cpm_report = CPMReport.objects.filter(project=project).order_by('-created').first()
 
     critical_path_image_url = cpm_report.cpm_graph.url if cpm_report and cpm_report.cpm_graph else None
 
@@ -499,7 +499,6 @@ def download_full_project_report_pdf(request, project_id):
     subject = 'Here is your PDF'
     body = 'Please find the attached PDF.'
     from_email = 'your_email@example.com'
-    to_email = [request.user.email]
     send_report_email(request,report.id,[request.user.email])
     # Serve the PDF as download
     response = HttpResponse(pdf_bytes, content_type='application/pdf')

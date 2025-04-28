@@ -1,4 +1,6 @@
 import os
+from django.urls import reverse_lazy
+from django.shortcuts import redirect
 from django.conf import settings
 from django.core.files import File
 from django.core.mail import EmailMessage
@@ -75,7 +77,8 @@ def generate_cpm_report(request,project_id):
         cpmreport.gantt_chart.save(os.path.basename(gantt_path), File(gantt_file))
 
     cpmreport.save()
-    return data
+    return redirect(reverse_lazy('projects:cpmreport_list'))
+    #return data
 
 
 
@@ -92,20 +95,20 @@ def send_report_email(request,report_id,emails):
     pdf_data = file.read()
     file.close()
     filename = report.__str__()
-    for email in emails:
 
-        # Create the email
-        email_msg = EmailMessage(
-            subject,
-            body,
-            from_email,
-            email,
-        )
 
-        # Attach the PDF file
-        email_msg.attach(filename, pdf_data, 'application/pdf')
+    # Create the email
+    email_msg = EmailMessage(
+        subject,
+        body,
+        from_email,
+        emails,
+    )
+
+    # Attach the PDF file
+    email_msg.attach(filename, pdf_data, 'application/pdf')
 
         # Send the email
-        email_msg.send()
+    email_msg.send()
 
 
