@@ -332,7 +332,7 @@ class CPMReportListView(BaseListView):
 
 class CPMReportDetailView(BaseDetailView):
     model = CPMReport
-    queryset = CPMReport.objects.prefetch_related('project__category__company__profiles','cpmreportdata_set__task__predecessors')
+    queryset = CPMReport.objects.prefetch_related('project__category__company__profiles','cpmreportdata_set__task__successor_tasks__from_task')
 
     def get_queryset(self):
         queryset = super().get_queryset()

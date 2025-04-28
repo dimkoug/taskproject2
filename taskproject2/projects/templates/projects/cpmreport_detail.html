@@ -33,8 +33,8 @@
               <tr  {% if d.slack == 0 %} class="table-danger" {% endif %}>
                 <td>{{d.task}}</td>
                 <td>
-                  {% for p in d.task.predecessors.all %}
-                    {{p}}
+                  {% for p in d.task.successor_tasks.all %}
+                    {{p.from_task}}
                   {% endfor %}
                 </td>
                 <td>{{d.task.start_date|date:"Y/m/d"}}</td>
