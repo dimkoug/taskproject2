@@ -1,8 +1,8 @@
-{% extends "cms/base.html" %}
+{% extends "layouts/base.html" %}
 {% load core %}
 
 {% block content %}
   {{object.name}}
 
-  <a class="back" href="{% get_url 'list' %}">Back</a>
+  <a class="back" href="{{view.list_url}}">Back</a>
 {% endblock %}
