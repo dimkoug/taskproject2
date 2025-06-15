@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Signup</title>
+    <link href="/static/lib/bootstrap-5.3.3-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/lib/bootstrap-icons-1.11.3/font/bootstrap-icons.css">
+  </head>
+  <body>
+    <div class="container py-2 mt-2">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Sign up</h5>
+          <div class="d-flex flex-row py-2">
+            <div class="col">
+              <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="row py-2">
+                  <div class="col">
+                    <button type="submit" class="btn btn-primary float-right">Sign up</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        h1, h2, h3 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        img { display: block; margin: 20px auto; max-width: 90%; height: auto; }
+        .page-break { page-break-before: always; }
+        footer { position: fixed; bottom: 10px; width: 100%; text-align: center; font-size: 10px; }
+    </style>
+</head>
+<body>
+
+<!-- Cover Page -->
+<h1>{{ project.name }}</h1>
+<h2>Project Full Report</h2>
+<h3>Generated on {{ today }}</h3>
+
+<div class="page-break"></div>
+
+<!-- Summary -->
+<h2>Project Summary</h2>
+<ul>
+    <li><strong>Total Cost:</strong> ${{ total_cost }}</li>
+    <li><strong>Number of Tasks:</strong> {{ tasks|length }}</li>
+    <li><strong>Start Date:</strong> {{ start_date }}</li>
+    <li><strong>End Date:</strong> {{ end_date }}</li>
+</ul>
+
+<div class="page-break"></div>
+
+<!-- Tasks Table -->
+<h2>Tasks List</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Task</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Duration (days)</th>
+            <th>Budget ($)</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for task in tasks %}
+        <tr>
+            <td>{{ task.name }}</td>
+            <td>{{ task.start_date|date:"Y-m-d" }}</td>
+            <td>{{ task.end_date|date:"Y-m-d" }}</td>
+            <td>{{ task.duration }}</td>
+            <td>{{ task.budget|default:"-" }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- Critical Path Graph -->
+<h2>Critical Path</h2>
+<img src="{{ critical_path_image_url }}" alt="Critical Path Graph">
+
+<div class="page-break"></div>
+
+<!-- Gantt Pages -->
+<h2>Gantt Chart</h2>
+{% for gantt_image_url in gantt_images %}
+    <img src="{{ gantt_image_url }}" alt="Gantt Chart Page {{ forloop.counter }}">
+    {% if not forloop.last %}
+    <div class="page-break"></div>
+    {% endif %}
+{% endfor %}
+
+<footer>Page {{ page }}</footer>
+
+</body>
+</html>

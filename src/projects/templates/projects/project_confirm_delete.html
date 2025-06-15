@@ -1,0 +1,17 @@
+{% extends "cms/base.html" %}
+{% load core %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <form method="post">{% csrf_token %}
+        <p>Are you sure you want to delete "{{ object }}"?</p>
+        <input class="delete btn btn-danger" type="submit" value="Confirm">
+    </form>
+
+      <a class="back btn btn-primary" href="{% get_url 'list' %}">Back</a>
+  </div>
+
+</div>
+
+{% endblock %}

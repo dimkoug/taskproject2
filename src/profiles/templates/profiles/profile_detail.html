@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container wrapper">
+  <div class="row py-2">
+    <div class="col">
+      <div class="row py-2">
+        <div class="col">
+          {{object}}
+        </div>
+      </div>
+      <div class="row py-2">
+        <div class="col">
+              <a href="{% url  'profile-delete' object.pk %}" class="btn btn-danger btn-sm">Delete</a>
+          <a href="{% url  'profile-update' object.pk %}" class="btn btn-warning float-right btn-sm">Update</a>
+          <a href="{{password_url}}" class="btn btn-sm btn-dark">Change Password</a>
+        </div>
+      </div>
+    </div>
+</div>
+
+
+
+
+{% endblock %}

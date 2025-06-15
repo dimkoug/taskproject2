@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Signup</title>
+    <link href="/static/lib/bootstrap-5.3.3-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/lib/bootstrap-icons-1.11.3/font/bootstrap-icons.css">
+  </head>
+  <body>
+    <div class="container py-4">
+      <div class="card m-auto">
+        <div class="card-body">
+          <h5 class="card-title text-center">Select Account Type</h5>
+          <div class="d-flex flex-row py-2">
+            <div class="col text-center ">
+              <a href="{% url 'signup' %}?type=user" class="btn btn-primary">User</a>
+            </div>
+            <div class="col text-center">
+              <a href="{% url 'signup' %}?type=company" class="btn btn-primary">Company</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+
+    </div>
+  </body>
+</html>

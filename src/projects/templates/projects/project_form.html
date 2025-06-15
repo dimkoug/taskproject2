@@ -1,0 +1,148 @@
+{% extends "layouts/base.html" %}
+{% load core %}
+
+
+{% block content %}
+<div class="row py-2">
+    <div class="col-12">
+        <form method="post" enctype='multipart/form-data' novalidate>{% csrf_token %}
+            <div class="card m-2 py-2">
+              <div class="card-body">
+                {{form.errors}}
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="info" aria-selected="true">Info</button>
+                  </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="info" role="tabpanel" aria-labelledby="info-tab" tabindex="0">
+                        <div class="row">
+                            <div class="col-4">
+                              <div class="form-group">
+                                {{ form.category.label_tag }}
+                                {{form.category}}
+                                {% if form.category.errors %}
+                                <div class="invalid-feedback">
+                                  {{form.category.errors}}
+                                </div>
+                                {%endif%}
+                                {% if form.category.help_text %}
+                                  <small class="form-text text-muted">{{ form.category.help_text }}</small>
+                                {% endif %}
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col-4">
+                                <div class="form-group">
+                                  {{ form.company.label_tag }}
+                                  {{form.company}}
+                                  {% if form.company.errors %}
+                                  <div class="invalid-feedback">
+                                    {{form.company.errors}}
+                                  </div>
+                                  {%endif%}
+                                  {% if form.company.help_text %}
+                                    <small class="form-text text-muted">{{ form.company.help_text }}</small>
+                                  {% endif %}
+                                </div>
+                              </div>
+                            <div class="col-4">
+                              <div class="form-group">
+                                {{ form.parent.label_tag }}
+                                {{form.parent}}
+                                {% if form.parent.errors %}
+                                <div class="invalid-feedback">
+                                  {{form.parent.errors}}
+                                </div>
+                                {%endif%}
+                                {% if form.parent.help_text %}
+                                  <small class="form-text text-muted">{{ form.parent.help_text }}</small>
+                                {% endif %}
+                              </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-6">
+                            <div class="form-group">
+                              {{ form.name.label_tag }}
+                              {{form.name}}
+                              {% if form.name.errors %}
+                              <div class="invalid-feedback">
+                                {{form.name.errors}}
+                              </div>
+                              {%endif%}
+                              {% if form.name.help_text %}
+                                <small class="form-text text-muted">{{ form.name.help_text }}</small>
+                              {% endif %}
+                            </div>
+                          </div>
+                          <div class="col-6">
+                            <div class="form-group">
+                              {{ form.budget.label_tag }}
+                              {{form.budget}}
+                              {% if form.budget.errors %}
+                              <div class="invalid-feedback">
+                                {{form.budget.errors}}
+                              </div>
+                              {%endif%}
+                              {% if form.budget.help_text %}
+                                <small class="form-text text-muted">{{ form.budget.help_text }}</small>
+                              {% endif %}
+                            </div>
+                          </div>
+                      </div>
+                    </div> <!-- info -->
+
+                {% include 'partials/_form_buttons.html' with form=form %}
+              </div>
+            </div>
+            
+          </form>
+
+    </div>
+
+
+</div>
+
+
+
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+  'use strict';
+  (function(w,d,$){
+    $(d).ready(function(){
+
+      $("#id_category").select2({
+        ajax: {
+          url: '/projects/get_sb_categories_data/',
+          data: function (params) {
+            var query = {
+              search: params.term,
+              type: 'public'
+            }
+            // Query parameters will be ?search=[term]&type=public
+            return query;
+          }
+        }
+      });
+      $("#id_parent").select2({
+        ajax: {
+          url: '/projects/get_sb_projects_data/',
+          data: function (params) {
+            var query = {
+              search: params.term,
+              type: 'public'
+            }
+            // Query parameters will be ?search=[term]&type=public
+            return query;
+          }
+        }
+      });
+    }) /* document ready */
+  })(window,document,jQuery)
+</script>
+{% endblock scripts %}

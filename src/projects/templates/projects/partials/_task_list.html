@@ -1,0 +1,46 @@
+{% load core %}
+<div class="row py-2">
+    <div class="col">
+      <div class="card">
+        <div class="card-body">
+          <table class="table table-stripped">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Project</th>
+                <th>Start Date</th>
+                <th>End date</th>
+                <td>Duration</td>
+                <td>Predecessors</td>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for obj in object_list %}
+              <tr>
+                <td>{{obj}}</td>
+                <td><a href="{% url 'projects:project_view' obj.project_id %}">{{obj.project}}</a></td>
+                <td>{{obj.start_date|date:"d/m/Y"}}</td>
+                <td>{{obj.end_date|date:"d/m/Y"}}</td>
+                <td>{{obj.duration}}</td>
+                <td>
+                  <ul>
+                    {% for p in obj.predecessors.all %}
+                      <li>{{p}}  <a href="{% url 'projects:predecessor_delete' obj.id p.id %}">Delete</a>  </li>
+                    {% endfor %}
+                    <a href="{%url 'projects:add-predecessor' obj.id %}">Add predecessor</a>
+                  </ul>
+
+                </td>
+                <td>
+                  {% include 'partials/_action_buttons.html' with obj=obj %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% include 'pagination.html' %}

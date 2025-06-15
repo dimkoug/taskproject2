@@ -9,4 +9,5 @@ migrations
 env
 settings_local.py
 public
-
+celerybeat-*
+.env
