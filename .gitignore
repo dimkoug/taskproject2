@@ -3,7 +3,6 @@ venv
 virtualenv
 .virtualenv
 __pycache__
-migrations
 *.pyc
 *.sqlite3
 env
@@ -11,3 +10,6 @@ settings_local.py
 public
 celerybeat-*
 .env
+**/migrations/*.py
+**/migrations/*.pyc
+!**/migrations/__init__.py
